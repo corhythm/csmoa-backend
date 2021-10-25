@@ -2,6 +2,8 @@ package com.dnr2144.csmoa.login;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
+import com.dnr2144.csmoa.login.model.CheckAccount;
+import com.dnr2144.csmoa.login.model.PostLoginReq;
 import com.dnr2144.csmoa.login.model.PostSignUpReq;
 import com.dnr2144.csmoa.login.model.PostSignUpRes;
 import com.dnr2144.csmoa.login.query.UserSqlQuery;
@@ -20,19 +22,18 @@ public class UserRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public void setDataSource(DataSource dataSource) { this.jdbcTemplate = new JdbcTemplate(dataSource); }
+    public void setDataSource(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    }
 
     // 회원가입
     public PostSignUpRes signUp(PostSignUpReq postSignUpReq) throws BaseException {
 
-        if (postSignUpReq.getEmail() == null || postSignUpReq.getNickname() == null || postSignUpReq.getPassword() == null) {
-            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
-        }
-
         try {
             String signUpUserQuery = UserSqlQuery.SIGN_UP_USER;
             // email, nickname, password, provider
-            jdbcTemplate.update(signUpUserQuery, postSignUpReq.getEmail(), postSignUpReq.getNickname(), postSignUpReq.getPassword(), "local");
+            jdbcTemplate.update(signUpUserQuery, postSignUpReq.getEmail(),
+                    postSignUpReq.getNickname(), postSignUpReq.getPassword(), "local");
 
             String successfulSignUp = UserSqlQuery.SUCCESSFUL_SIGN_UP;
             return jdbcTemplate.queryForObject(successfulSignUp,
@@ -42,6 +43,23 @@ public class UserRepository {
                             .nickname(rs.getString("nickname"))
                             .provider(rs.getString("provider"))
                             .build(), postSignUpReq.getEmail());
+
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // 로그인
+    public CheckAccount login(PostLoginReq postLoginReq) throws BaseException {
+
+        try {
+            String loginUserQuery = UserSqlQuery.LOGIN_USER;
+            return jdbcTemplate.queryForObject(loginUserQuery,
+                    (rs, rowNum) -> CheckAccount.builder()
+                            .userId(rs.getLong("user_id"))
+                            .password(rs.getString("password"))
+                            .build(), postLoginReq.getEmail());
 
         } catch (Exception exception) {
             log.error(exception.getMessage());
@@ -66,6 +84,17 @@ public class UserRepository {
         try {
             String validateUserNicknameQuery = UserSqlQuery.VALIDATE_DUPLICATE_USER_NICKNAME;
             return jdbcTemplate.queryForObject(validateUserNicknameQuery, Integer.class, nickname);
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // 존재하는 계정인지 체크 (status == false 계정 포함)
+    public Integer checkExistsEmail(String email) throws BaseException {
+        try {
+            String checkExistsEmailQuery = UserSqlQuery.CHECK_EXISTS_EMAIL;
+            return jdbcTemplate.queryForObject(checkExistsEmailQuery, Integer.class, email);
         } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);

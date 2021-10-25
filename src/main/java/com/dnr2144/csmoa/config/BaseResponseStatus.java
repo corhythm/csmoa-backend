@@ -17,10 +17,14 @@ public enum BaseResponseStatus {
     REQUEST_ERROR(false, 200, "입력값을 확인해주세요."),
     EMPTY_JWT(false, 201, "JWT를 입력해주세요."),
     INVALID_JWT(false, 202, "유효하지 않은 JWT입니다."),
+    FAILED_TO_PASSWORD_ENCRYPT(false, 203, "비밀번호 암호화에 실패했습니다"),
+    FAILED_TO_PASSWORD_DECRYPT(false, 203, "비밀번호 복호화에 실패했습니다"),
 
     // 210번 대: user 오류
     NICKNAME_DUPLICATION_ERROR(false, 210, "이미 존재하는 닉네임입니다"),
     EMAIL_DUPLICATION_ERROR(false, 211, "이미 존재하는 이메일입니다."),
+    INVALID_ACCOUNT_ERROR(false, 212, "계정이 존재하지 않거나 사용이 정지됐습니다."),
+    UNMATCHED_PASSWORD_ERROR(false, 213, "비밀번호가 일치하지 않습니다."),
 
 
     /**

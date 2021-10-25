@@ -25,7 +25,7 @@ public class JwtService {
     @param userIdx
     @return String
      */
-    public String createJwt(int userId) {
+    public String createJwt(long userId) {
         Date now = new Date();
         Map<String, Object> headers = new HashMap<>(); // 테스트
         headers.put("typ", "JWT"); // 테스트
