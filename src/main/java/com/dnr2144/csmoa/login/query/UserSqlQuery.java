@@ -13,4 +13,8 @@ public class UserSqlQuery {
     public static final String CHECK_EXISTS_EMAIL = "SELECT EXISTS(SELECT * FROM users WHERE email = ? and status = true);";
 
     public static final String LOGIN_USER = "SELECT user_id, password FROM users WHERE email = ?";
+
+    public static final String CHECK_EXISTS_OAUTH_ACCOUNT = "SELECT EXISTS(SELECT * FROM users WHERE email = ? and provider = ?);";
+
+    public static final String OAUTH_SIGN_UP_USER = "INSERT INTO users (email, nickname, provider, profile_image_url) VALUE (?, ?, ?, ?);";
 }

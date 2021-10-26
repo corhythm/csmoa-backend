@@ -2,10 +2,7 @@ package com.dnr2144.csmoa.login;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
-import com.dnr2144.csmoa.login.model.CheckAccount;
-import com.dnr2144.csmoa.login.model.PostLoginReq;
-import com.dnr2144.csmoa.login.model.PostSignUpReq;
-import com.dnr2144.csmoa.login.model.PostSignUpRes;
+import com.dnr2144.csmoa.login.model.*;
 import com.dnr2144.csmoa.login.query.UserSqlQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +64,21 @@ public class UserRepository {
         }
     }
 
+    // OAuth로 로그인하기
+    public Long oAuthLogin(PostOAuthLoginReq postOAuthLoginReq) throws BaseException {
+
+        // 이미 OAuth 계정으로 가입을 안 했다면
+        if (checkExistsOAuthAccount(postOAuthLoginReq.getEmail(), postOAuthLoginReq.getProvider()) == 0) {
+            String oauthSignUpUserQuery = UserSqlQuery.OAUTH_SIGN_UP_USER;
+            jdbcTemplate.update(oauthSignUpUserQuery, postOAuthLoginReq.getEmail(),
+                    postOAuthLoginReq.getNickname(), postOAuthLoginReq.getProvider(), postOAuthLoginReq.getProfileImageUrl());
+        }
+
+        String getUserId = "SELECT user_id from users where email = ? and provider = ?";
+        return jdbcTemplate.queryForObject(getUserId, Long.class,
+                postOAuthLoginReq.getEmail(), postOAuthLoginReq.getProvider());
+    }
+
     // 이메일 중복 체크
     public Integer validateUserEmail(String email) throws BaseException {
 
@@ -95,6 +107,17 @@ public class UserRepository {
         try {
             String checkExistsEmailQuery = UserSqlQuery.CHECK_EXISTS_EMAIL;
             return jdbcTemplate.queryForObject(checkExistsEmailQuery, Integer.class, email);
+        } catch (Exception exception) {
+            log.error(exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // 소셜 로그인으로 가입된 이력이 있는지 체크
+    public Integer checkExistsOAuthAccount(String email, String provider) throws BaseException {
+        try {
+            String checkExistsOAuthAccountQuery = UserSqlQuery.CHECK_EXISTS_OAUTH_ACCOUNT;
+            return jdbcTemplate.queryForObject(checkExistsOAuthAccountQuery, Integer.class, email, provider);
         } catch (Exception exception) {
             log.error(exception.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);

@@ -92,6 +92,22 @@ public class UserService {
         }
     }
 
+    public PostLoginRes oAuthLogin(PostOAuthLoginReq postOAuthLoginReq) throws BaseException {
+
+        // 필수 확인 정보 다 기입됐는지 확인
+        if (postOAuthLoginReq.getEmail() == null || postOAuthLoginReq.getNickname() == null ||
+                postOAuthLoginReq.getProvider() == null || postOAuthLoginReq.getEmail().isEmpty() ||
+                postOAuthLoginReq.getNickname().isEmpty() || postOAuthLoginReq.getProvider().isEmpty()) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+
+        Long userId = userRepository.oAuthLogin(postOAuthLoginReq);
+        return PostLoginRes.builder()
+                .userId(userId)
+                .xAccessToken(jwtService.createJwt(userId))
+                .build();
+    }
+
     // 비밀번호 암호화
     private String encryptPassword(String plainPassword) throws BaseException {
 

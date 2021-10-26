@@ -35,7 +35,8 @@ public class JwtService {
                 .setHeader(headers)
                 .claim("userId", userId)
                 .setIssuedAt(now)
-                .setExpiration(new Date(System.currentTimeMillis() + 1 * (1000 * 60 * 60 * 24 * 365)))
+                // 1000L 60초 60분 24시간 2일
+                .setExpiration(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 2)))
                 .signWith(SignatureAlgorithm.HS256, Secret.JWT_SECRET_KEY)
                 .compact();
     }
@@ -53,8 +54,8 @@ public class JwtService {
     JWT에서 userId 추출
     @return int
     @throws BaseException
-     */
-    public int getUserId() throws BaseException {
+    */
+    public Long getUserId() throws BaseException {
         //1. JWT 추출
         String accessToken = getJwt();
         if (accessToken == null || accessToken.length() == 0) {
@@ -72,7 +73,7 @@ public class JwtService {
         }
 
         // 3. userIdx 추출
-        return claims.getBody().get("userId", Integer.class);
+        return claims.getBody().get("userId", Long.class);
     }
 
 }
