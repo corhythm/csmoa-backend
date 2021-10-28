@@ -84,7 +84,7 @@ public class UserService {
             log.error("decrypt 전");
             return PostLoginRes.builder()
                     .userId(checkAccount.getUserId())
-                    .xAccessToken(jwtService.createJwt(checkAccount.getUserId()))
+                    .accessToken(jwtService.createJwt(checkAccount.getUserId()))
                     .build();
         } else {
             // 비밀번호 불일치
@@ -101,10 +101,19 @@ public class UserService {
             throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
         }
 
+        // 허용된 OAuth 공급자인지 확인
+        switch (postOAuthLoginReq.getProvider()) {
+            case "google":
+            case "kakao":
+                break;
+            default:
+                throw new BaseException(BaseResponseStatus.INVALID_OAUTH_PROVIDER);
+        }
+
         Long userId = userRepository.oAuthLogin(postOAuthLoginReq);
         return PostLoginRes.builder()
                 .userId(userId)
-                .xAccessToken(jwtService.createJwt(userId))
+                .accessToken(jwtService.createJwt(userId))
                 .build();
     }
 

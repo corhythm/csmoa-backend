@@ -25,6 +25,7 @@ public enum BaseResponseStatus {
     EMAIL_DUPLICATION_ERROR(false, 211, "이미 존재하는 이메일입니다."),
     INVALID_ACCOUNT_ERROR(false, 212, "계정이 존재하지 않거나 사용이 정지됐습니다."),
     UNMATCHED_PASSWORD_ERROR(false, 213, "비밀번호가 일치하지 않습니다."),
+    INVALID_OAUTH_PROVIDER(false, 214, "허용되지 않은 OAUTH 공급자입니다."),
 
 
     /**

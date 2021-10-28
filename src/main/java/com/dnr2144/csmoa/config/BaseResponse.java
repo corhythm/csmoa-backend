@@ -12,10 +12,13 @@ import static com.dnr2144.csmoa.config.BaseResponseStatus.*;
 @AllArgsConstructor
 @JsonPropertyOrder({"isSuccess", "code", "message", "result"})
 public class BaseResponse<T> {
+
     @JsonProperty("isSuccess")
     private final Boolean isSuccess;
+
     private final String message;
     private final int code;
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private T result;
 

@@ -46,6 +46,7 @@ public class UserController {
 
         try {
             PostLoginRes postLoginRes = userService.login(postLoginReq);
+            log.info(postLoginRes.toString());
             return new BaseResponse<>(postLoginRes);
         } catch (BaseException ex) {
             return new BaseResponse<>(ex.getStatus());
@@ -66,6 +67,7 @@ public class UserController {
 
         try {
             PostLoginRes postLoginRes = userService.oAuthLogin(postOAuthLoginReq);
+            log.info(postLoginRes.toString());
             return new BaseResponse<>(postLoginRes);
         } catch (BaseException ex) {
             return new BaseResponse<>(ex.getStatus());

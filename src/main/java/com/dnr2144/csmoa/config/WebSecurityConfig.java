@@ -1,5 +1,8 @@
 package com.dnr2144.csmoa.config;
 
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
 public class WebSecurityConfig  {
 
 //    @Override
