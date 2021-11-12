@@ -70,8 +70,80 @@ public class UserController {
             log.info(postLoginRes.toString());
             return new BaseResponse<>(postLoginRes);
         } catch (BaseException ex) {
+            log.error("login/oauth: " + ex.getStatus().toString());
             return new BaseResponse<>(ex.getStatus());
         }
+    }
+
+    // accessToken과 refreshToken 재발급
+    @GetMapping("/token")
+    @ResponseBody
+    public BaseResponse<PostTokenRes> getRefreshJwtToken(@RequestHeader("Refresh-Token") String refreshToken) {
+
+        if (refreshToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+
+        try {
+            long userId = jwtService.getUserId(refreshToken);
+
+            // token expiration refresh
+            PostTokenRes postTokenRes = PostTokenRes.builder()
+                    .accessToken(jwtService.createJwt(userId, jwtService.ACCESS_TOKEN))
+                    .refreshToken(jwtService.createJwt(userId, jwtService.REFRESH_TOKEN))
+                    .userId(userId)
+                    .build();
+            return new BaseResponse<>(postTokenRes);
+        } catch (BaseException ex) {
+            log.error("token: " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+    }
+
+    @GetMapping("/user-info")
+    @ResponseBody
+    public BaseResponse<GetUserInfoRes> getUserInfo(@RequestHeader("Access-Token") String accessToken) {
+
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+
+        try {
+            long userId = jwtService.getUserId(accessToken);
+
+            GetUserInfoRes getUserInfoRes = userService.getUserInfo(userId);
+            log.info("getUserInfoRes = " + getUserInfoRes.toString());
+            return new BaseResponse<>(getUserInfoRes);
+
+        } catch (BaseException ex) {
+            log.error("(get)user-info: " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+    }
+
+    // 유정 정보 수정
+    @PatchMapping("/user-info")
+    @ResponseBody
+    public BaseResponse<PatchUserInfoRes> patchUserInfo(@RequestHeader("Access-Token") String accessToken, PatchUserInfoReq patchUserInfoReq) {
+
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+
+        log.info(patchUserInfoReq.toString());
+
+        try {
+            long userId = jwtService.getUserId(accessToken);
+
+            PatchUserInfoRes patchUserInfoRes = userService.patchUserInfo(userId, patchUserInfoReq);
+
+            return new BaseResponse<>(patchUserInfoRes);
+        } catch (BaseException ex) {
+            log.error("(patch)user-info: " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+
+
 
     }
 

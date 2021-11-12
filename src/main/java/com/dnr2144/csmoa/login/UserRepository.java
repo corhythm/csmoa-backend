@@ -2,8 +2,10 @@ package com.dnr2144.csmoa.login;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
+import com.dnr2144.csmoa.firebase.FirebaseStorageManager;
 import com.dnr2144.csmoa.login.model.*;
 import com.dnr2144.csmoa.login.query.UserSqlQuery;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,9 +16,12 @@ import javax.sql.DataSource;
 
 @Repository
 @Slf4j
+@RequiredArgsConstructor
 public class UserRepository {
 
     private JdbcTemplate jdbcTemplate;
+    private final FirebaseStorageManager firebaseStorageManager;
+
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
@@ -56,7 +61,8 @@ public class UserRepository {
                     (rs, rowNum) -> CheckAccount.builder()
                             .userId(rs.getLong("user_id"))
                             .password(rs.getString("password"))
-                            .build(), postLoginReq.getEmail());
+                            .build(),
+                    postLoginReq.getEmail());
 
         } catch (Exception exception) {
             log.error(exception.getMessage());
@@ -66,17 +72,68 @@ public class UserRepository {
 
     // OAuth로 로그인하기
     public Long oAuthLogin(PostOAuthLoginReq postOAuthLoginReq) throws BaseException {
+        try {
+            if (checkOAuthEmailExists(postOAuthLoginReq.getEmail(), postOAuthLoginReq.getProvider()) == 0) {
+                String oauthSignUpUserQuery = UserSqlQuery.OAUTH_SIGN_UP_USER;
+                jdbcTemplate.update(oauthSignUpUserQuery, postOAuthLoginReq.getEmail(),
+                        postOAuthLoginReq.getNickname(), postOAuthLoginReq.getProvider(), postOAuthLoginReq.getProfileImageUrl());
+            }
 
-        // 이미 OAuth 계정으로 가입을 안 했다면
-        if (checkExistsOAuthAccount(postOAuthLoginReq.getEmail(), postOAuthLoginReq.getProvider()) == 0) {
-            String oauthSignUpUserQuery = UserSqlQuery.OAUTH_SIGN_UP_USER;
-            jdbcTemplate.update(oauthSignUpUserQuery, postOAuthLoginReq.getEmail(),
-                    postOAuthLoginReq.getNickname(), postOAuthLoginReq.getProvider(), postOAuthLoginReq.getProfileImageUrl());
+            String getUserIdQuery = "SELECT user_id FROM users WHERE email = ? AND provider = ?";
+            return jdbcTemplate.queryForObject(getUserIdQuery, Long.class,
+                    postOAuthLoginReq.getEmail(), postOAuthLoginReq.getProvider());
+        } catch (Exception exception) {
+            log.error("oAuthLogin / " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
+    }
 
-        String getUserId = "SELECT user_id from users where email = ? and provider = ?";
-        return jdbcTemplate.queryForObject(getUserId, Long.class,
-                postOAuthLoginReq.getEmail(), postOAuthLoginReq.getProvider());
+    public GetUserInfoRes getUserInfo(long userId) throws BaseException {
+        try {
+            String getUserInfoQuery = UserSqlQuery.GET_USER_INFO;
+            return jdbcTemplate.queryForObject(getUserInfoQuery,
+                    (rs, rowNum) -> GetUserInfoRes.builder()
+                            .userId(rs.getLong("user_id"))
+                            .email(rs.getString("email"))
+                            .nickname(rs.getString("nickname"))
+                            .userProfileImageUrl(rs.getString("profile_image_url"))
+                            .build()
+                    , userId);
+
+        } catch (Exception exception) {
+            log.error("getUserInfo / " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    public PatchUserInfoRes patchUserInfo(long userId, PatchUserInfoReq patchUserInfoReq) throws BaseException {
+
+        try {
+            String patchUserInfoQuery = UserSqlQuery.PATCH_USER_INFO;
+            String getUpdatedUserInfoQuery = UserSqlQuery.GET_UPDATED_USER_INFO;
+            String profileImageFilePath = null;
+
+            // 프로필 변경하면
+            if (patchUserInfoReq.getProfileImageFile() != null) {
+                profileImageFilePath = firebaseStorageManager.save(userId, patchUserInfoReq.getProfileImageFile());
+            }
+
+            // update userInfo
+            jdbcTemplate.update(patchUserInfoQuery, patchUserInfoReq.getNickname(),
+                    profileImageFilePath, userId);
+
+            // 업데이트된 정보 가져오기
+            return jdbcTemplate.queryForObject(getUpdatedUserInfoQuery,
+                    (rs, rowNum) -> PatchUserInfoRes.builder()
+                            .userId(rs.getLong("user_id"))
+                            .nickname(rs.getString("nickname"))
+                            .userProfileImageUrl(rs.getString("profile_image_url"))
+                            .build(), userId);
+
+        } catch (Exception exception) {
+            log.error("patchUserInfo / " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
     }
 
     // 이메일 중복 체크
@@ -102,26 +159,37 @@ public class UserRepository {
         }
     }
 
-    // 존재하는 계정인지 체크 (status == false 계정 포함)
-    public Integer checkExistsEmail(String email) throws BaseException {
+    // OAuth는 아닌데 동일 이메일로 local로 가입한 경우
+    public Integer checkLocalProviderEmailExits(String email) throws BaseException {
         try {
-            String checkExistsEmailQuery = UserSqlQuery.CHECK_EXISTS_EMAIL;
-            return jdbcTemplate.queryForObject(checkExistsEmailQuery, Integer.class, email);
+            String notOAuthEmailExitsQuery = UserSqlQuery.NOT_OAUTH_USER_EMAIL_EXISTS;
+            return jdbcTemplate.queryForObject(notOAuthEmailExitsQuery, Integer.class, email);
         } catch (Exception exception) {
-            log.error(exception.getMessage());
+            log.error("checkLocalProviderEmailExits / " + exception.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
 
-    // 소셜 로그인으로 가입된 이력이 있는지 체크
-    public Integer checkExistsOAuthAccount(String email, String provider) throws BaseException {
+    // OAuth로 이미 계정 정보가 DB에 들어가 있는지 체크
+    public Integer checkOAuthEmailExists(String email, String provider) throws BaseException {
         try {
-            String checkExistsOAuthAccountQuery = UserSqlQuery.CHECK_EXISTS_OAUTH_ACCOUNT;
-            return jdbcTemplate.queryForObject(checkExistsOAuthAccountQuery, Integer.class, email, provider);
+            String oAUthUserEmailExistsQuery = UserSqlQuery.OAUTH_USER_EMAIL_EXISTS;
+            return jdbcTemplate.queryForObject(oAUthUserEmailExistsQuery, Integer.class, email, provider);
         } catch (Exception exception) {
-            log.error(exception.getMessage());
+            log.error("checkOAuthEmailExists / " + exception.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
+
+    public Integer checkUserExists(long userId) throws BaseException {
+        try {
+            String checkUserExistsQuery = UserSqlQuery.CHECK_USER_EXISTS;
+            return jdbcTemplate.queryForObject(checkUserExistsQuery, Integer.class, userId);
+        } catch (Exception exception) {
+            log.error("checkUserExists / " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
 
 }

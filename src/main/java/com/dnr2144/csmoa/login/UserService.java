@@ -1,6 +1,7 @@
 package com.dnr2144.csmoa.login;
 
 import com.dnr2144.csmoa.config.BaseException;
+import com.dnr2144.csmoa.config.BaseResponse;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.config.secret.Secret;
 import com.dnr2144.csmoa.login.model.*;
@@ -61,15 +62,9 @@ public class UserService {
         }
 
         // 가입한 사용자인지 조회
-        if (checkExitsEmail(postLoginReq.getEmail()) == 0) {
+        if (validateDuplicateUserEmail(postLoginReq.getEmail()) == 0) {
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
         }
-
-        // 비밀번호가 빈 값일 때
-        if (postLoginReq.getPassword() == null || postLoginReq.getPassword().isEmpty()) {
-            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
-        }
-
 
         // 이메일을 갖고 동일한 계정 정보 가져오기(userId, password)
         CheckAccount checkAccount = userRepository.login(postLoginReq);
@@ -84,7 +79,8 @@ public class UserService {
             log.error("decrypt 전");
             return PostLoginRes.builder()
                     .userId(checkAccount.getUserId())
-                    .accessToken(jwtService.createJwt(checkAccount.getUserId()))
+                    .accessToken(jwtService.createJwt(checkAccount.getUserId(), jwtService.ACCESS_TOKEN))
+                    .refreshToken(jwtService.createJwt(checkAccount.getUserId(), jwtService.REFRESH_TOKEN))
                     .build();
         } else {
             // 비밀번호 불일치
@@ -93,7 +89,6 @@ public class UserService {
     }
 
     public PostLoginRes oAuthLogin(PostOAuthLoginReq postOAuthLoginReq) throws BaseException {
-
         // 필수 확인 정보 다 기입됐는지 확인
         if (postOAuthLoginReq.getEmail() == null || postOAuthLoginReq.getNickname() == null ||
                 postOAuthLoginReq.getProvider() == null || postOAuthLoginReq.getEmail().isEmpty() ||
@@ -110,11 +105,47 @@ public class UserService {
                 throw new BaseException(BaseResponseStatus.INVALID_OAUTH_PROVIDER);
         }
 
+        // Local로 이미 동일 이메일로 가입했는지 확인
+        if (userRepository.checkLocalProviderEmailExits(postOAuthLoginReq.getEmail()) == 1) {
+            throw new BaseException(BaseResponseStatus.EMAIL_DUPLICATION_ERROR);
+        }
+
         Long userId = userRepository.oAuthLogin(postOAuthLoginReq);
-        return PostLoginRes.builder()
+        PostLoginRes postLoginRes = PostLoginRes.builder()
                 .userId(userId)
-                .accessToken(jwtService.createJwt(userId))
+                .accessToken(jwtService.createJwt(userId, jwtService.ACCESS_TOKEN))
+                .refreshToken(jwtService.createJwt(userId, jwtService.REFRESH_TOKEN))
                 .build();
+        log.info("postLoginRes = " + postLoginRes.toString());
+        return postLoginRes;
+    }
+
+    // 유저 정보 가져오기
+    public GetUserInfoRes getUserInfo(long userId) throws BaseException {
+        if (userRepository.checkUserExists(userId) == 0) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+
+        return userRepository.getUserInfo(userId);
+    }
+
+    // 유저 정보 변경
+    public PatchUserInfoRes patchUserInfo(long userId, PatchUserInfoReq patchUserInfoReq) throws BaseException {
+
+        // 존재하지 않는 유저일 때
+        if (userRepository.checkUserExists(userId) == 0) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+
+        // patchUserInfoReq 자체가 null이거나 nickname이랑 이미지 파일 두 개다 null일 때
+        if (patchUserInfoReq == null ||
+                (patchUserInfoReq.getProfileImageFile() == null && patchUserInfoReq.getNickname() == null)) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+
+        // 여기서 파이어베이스 스토리지에 업로드하자 -> fileName: csmoa_userId.jpg
+
+        return userRepository.patchUserInfo(userId, patchUserInfoReq);
     }
 
     // 비밀번호 암호화
@@ -131,7 +162,6 @@ public class UserService {
 
     // 비밀번호 복호화
     private String decryptPassword(String encryptedPassword) throws BaseException {
-
         try {
             return new AES128(Secret.USER_INFO_PASSWORD_KEY).decrypt(encryptedPassword);
         } catch (InvalidAlgorithmParameterException | NoSuchPaddingException | IllegalBlockSizeException |
@@ -142,17 +172,12 @@ public class UserService {
     }
 
     public int validateDuplicateUserEmail(String email) throws BaseException {
-
-        // userRepository.validateUserEmail(email) <- 여기서 예외 터지면 어디서 catch하지?
         return userRepository.validateUserEmail(email);
     }
 
+    // 닉네임 중복 체크
     public int validateDuplicateUserNickname(String nickname) throws BaseException {
         return userRepository.validateUserNickname(nickname);
-    }
-
-    public int checkExitsEmail(String email) throws BaseException {
-        return userRepository.checkExistsEmail(email);
     }
 
 }

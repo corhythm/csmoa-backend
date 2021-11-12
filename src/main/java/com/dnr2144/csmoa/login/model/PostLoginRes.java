@@ -12,11 +12,13 @@ import lombok.ToString;
 public class PostLoginRes {
 
     private final String accessToken;
+    private final String refreshToken;
     private final Long userId;
 
     @Builder
-    public PostLoginRes(String accessToken, Long userId) {
+    public PostLoginRes(String accessToken, String refreshToken, Long userId) {
         this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
         this.userId = userId;
     }
 }
