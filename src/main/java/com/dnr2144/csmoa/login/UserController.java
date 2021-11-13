@@ -134,9 +134,8 @@ public class UserController {
 
         try {
             long userId = jwtService.getUserId(accessToken);
-
             PatchUserInfoRes patchUserInfoRes = userService.patchUserInfo(userId, patchUserInfoReq);
-
+            log.info(patchUserInfoRes.toString());
             return new BaseResponse<>(patchUserInfoRes);
         } catch (BaseException ex) {
             log.error("(patch)user-info: " + ex.getStatus().toString());

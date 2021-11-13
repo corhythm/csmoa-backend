@@ -2,8 +2,10 @@ package com.dnr2144.csmoa.login.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class PatchUserInfoRes {
     private final Long userId;
     private final String nickname;

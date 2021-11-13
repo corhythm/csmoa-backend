@@ -19,7 +19,10 @@ import java.util.UUID;
 @Slf4j
 public class FirebaseStorageManager {
 
-    private final String MY_BUCKET_NAME = "csmoa-38f5b.appspot.com";
+    private final String BUCKET_NAME = "csmoa-38f5b.appspot.com";
+    private final String PROFILE = "profile";
+    private final String RECIPE = "recipe";
+    private final String REVIEW = "review";
 
     @PostConstruct // Bean이 SpringApplicationContext에 등록될 때 실행
     private void init() {
@@ -29,7 +32,8 @@ public class FirebaseStorageManager {
 
             FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .setStorageBucket(MY_BUCKET_NAME)
+                    .setStorageBucket(BUCKET_NAME)
+                    .setProjectId("csmoa-38f5b")
                     .setDatabaseUrl("https://csmoa-38f5b-default-rtdb.firebaseio.com")
                     .build();
 
@@ -40,22 +44,23 @@ public class FirebaseStorageManager {
         }
     }
 
-    public String save(Long userId, MultipartFile multipartFile) throws IOException {
+    // 데이터는 소중하니 delete는 굳이 만들지 말자.
+    public String saveProfileImage(Long userId, MultipartFile multipartFile) throws IOException {
         Bucket bucket = StorageClient.getInstance().bucket();
         String fileName = userId + "_" + UUID.randomUUID();
-        Blob blob = bucket.create(fileName, multipartFile.getBytes(), multipartFile.getContentType());
+        String filePath = PROFILE + "/" + fileName;
+        Blob blob = bucket.create(filePath, multipartFile.getBytes(), multipartFile.getContentType());
 
         log.info("bucket name = " + bucket.getName());
         log.info("mediaLink = " + blob.getMediaLink());
         log.info("selfLink = " + blob.getSelfLink());
-        log.info("blob = " + blob.toString());
+        log.info("blob = " + blob);
         log.info("fileName = " + fileName);
 
-        // "https://firebasestorage.googleapis.com/v0/b/<bucket name>/o/<fileName>?alt=media"
-        String downloadUrl = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s?alt=media", MY_BUCKET_NAME, fileName);;
-        log.info(downloadUrl);
+        // "https://firebasestorage.googleapis.com/v0/b/<my bucket name>/o/<fileName>?alt=media"
+        String absoluteFileUrl = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s%%2F%s?alt=media", BUCKET_NAME, PROFILE, fileName);
+        log.info(absoluteFileUrl);
 
-        return downloadUrl;
+        return absoluteFileUrl;
     }
-
 }

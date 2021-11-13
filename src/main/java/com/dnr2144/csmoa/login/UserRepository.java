@@ -13,9 +13,8 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 
-
-@Repository
 @Slf4j
+@Repository
 @RequiredArgsConstructor
 public class UserRepository {
 
@@ -106,24 +105,33 @@ public class UserRepository {
         }
     }
 
+    // 프로필 정보 변경
     public PatchUserInfoRes patchUserInfo(long userId, PatchUserInfoReq patchUserInfoReq) throws BaseException {
 
         try {
-            String patchUserInfoQuery = UserSqlQuery.PATCH_USER_INFO;
-            String getUpdatedUserInfoQuery = UserSqlQuery.GET_UPDATED_USER_INFO;
-            String profileImageFilePath = null;
+            if (patchUserInfoReq.getNickname() != null && patchUserInfoReq.getProfileImageFile() != null) { // 닉네임 & 프로필 이미지 변경
+                if (validateUserNickname(patchUserInfoReq.getNickname()) == 1) { // 닉네임 중복 체크
+                    log.info("닉네임 프로필 이미지 둘 다 변경 / patchUserInfoReq = " + patchUserInfoReq);
+                    throw new BaseException(BaseResponseStatus.NICKNAME_DUPLICATION_ERROR);
+                };
+                String absoluteFileUrl = firebaseStorageManager.saveProfileImage(userId, patchUserInfoReq.getProfileImageFile());
+                jdbcTemplate.update(UserSqlQuery.PATCH_USER_INFO_ALL, patchUserInfoReq.getNickname(), absoluteFileUrl, userId);
 
-            // 프로필 변경하면
-            if (patchUserInfoReq.getProfileImageFile() != null) {
-                profileImageFilePath = firebaseStorageManager.save(userId, patchUserInfoReq.getProfileImageFile());
+            } else if (patchUserInfoReq.getNickname() == null && patchUserInfoReq.getProfileImageFile() != null) { // 프로필 이미지만 변경
+                log.info("프로필 이미지만 변경 / patchUserInfoReq = " + patchUserInfoReq);
+                String absoluteFileUrl = firebaseStorageManager.saveProfileImage(userId, patchUserInfoReq.getProfileImageFile());
+                jdbcTemplate.update(UserSqlQuery.PATCH_USER_INFO_ONLY_PROFILE_IMAGE, absoluteFileUrl, userId);
+
+            } else { // 닉네임만 변경
+                log.info("닉네임만 변경/ patchUserInfoReq = " + patchUserInfoReq);
+                if (validateUserNickname(patchUserInfoReq.getNickname()) == 1) {
+                    throw new BaseException(BaseResponseStatus.NICKNAME_DUPLICATION_ERROR);
+                };
+                jdbcTemplate.update(UserSqlQuery.PATCH_USER_INFO_ONLY_NICKNAME, patchUserInfoReq.getNickname(), userId);
             }
 
-            // update userInfo
-            jdbcTemplate.update(patchUserInfoQuery, patchUserInfoReq.getNickname(),
-                    profileImageFilePath, userId);
-
             // 업데이트된 정보 가져오기
-            return jdbcTemplate.queryForObject(getUpdatedUserInfoQuery,
+            return jdbcTemplate.queryForObject(UserSqlQuery.GET_UPDATED_USER_INFO,
                     (rs, rowNum) -> PatchUserInfoRes.builder()
                             .userId(rs.getLong("user_id"))
                             .nickname(rs.getString("nickname"))
@@ -131,6 +139,10 @@ public class UserRepository {
                             .build(), userId);
 
         } catch (Exception exception) {
+            if (exception instanceof BaseException) {
+                throw new BaseException(((BaseException) exception).getStatus());
+            }
+            exception.printStackTrace();
             log.error("patchUserInfo / " + exception.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }

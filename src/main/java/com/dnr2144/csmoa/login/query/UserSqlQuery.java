@@ -22,7 +22,11 @@ public class UserSqlQuery {
 
     public static final String GET_USER_INFO = "SELECT user_id, email, nickname, profile_image_url FROM users WHERE user_id = ?;";
 
-    public static final String PATCH_USER_INFO = "UPDATE users SET nickname = ?, profile_image_url = ? WHERE user_id = ?;";
+    public static final String PATCH_USER_INFO_ALL = "UPDATE users SET nickname = ?, profile_image_url = ? WHERE user_id = ?;";
+
+    public static final String PATCH_USER_INFO_ONLY_PROFILE_IMAGE = "UPDATE users SET profile_image_url = ? WHERE user_id = ?;";
+
+    public static final String PATCH_USER_INFO_ONLY_NICKNAME = "UPDATE users SET nickname = ? WHERE user_id = ?;";
 
     public static final String GET_UPDATED_USER_INFO = "SELECT user_id, nickname, profile_image_url FROM users WHERE user_id = ?;";
 }
