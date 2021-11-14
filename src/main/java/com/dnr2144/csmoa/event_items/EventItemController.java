@@ -2,17 +2,13 @@ package com.dnr2144.csmoa.event_items;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponse;
+import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.event_items.model.EventItem;
-import com.dnr2144.csmoa.event_items.model.GetEventItemsRes;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.dnr2144.csmoa.util.JwtService;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,38 +18,69 @@ import java.util.List;
 public class EventItemController {
 
     private final EventItemService eventItemService;
+    private final JwtService jwtService;
 
-    // TODO: 나중에 accessToken 받아야 함.
-    // 이벤트 아이템 불러오기
-    @GetMapping("/event-items")
+    // NOTE: 추천 행사 상품 불러오기
+    @GetMapping("/recommended-event-items")
     @ResponseBody
-    public BaseResponse<GetEventItemsRes> getEventItems(@RequestParam("page") int pageNum) {
+    public BaseResponse<List<EventItem>> getRecommendedEventItems(@RequestHeader("Access-Token") String accessToken) {
+        // accessToken is null
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
 
-        log.info("/event-items?page=" + pageNum);
         try {
-            return new BaseResponse<>(eventItemService.getEventItems(pageNum));
+            long userId = jwtService.getUserId(accessToken);
+            log.info("/recommended-event-items / userId = " + userId);
+            return new BaseResponse<>(eventItemService.getRecommendedEventItems(userId));
         } catch (BaseException exception) {
             log.error("event-items: " + exception.getStatus().toString());
             return new BaseResponse<>(exception.getStatus());
         }
     }
 
-    // TODO: 나중에 accessToken 받아야 함
-    // 특정 이벤트 아이템 클릭 했을 때 -> 추천 아이템 리스트 전달
-     @GetMapping("/event-items/{eventItemId}")
-     @ResponseBody
-    public BaseResponse<List<EventItem>> getEventItem(@PathVariable Long eventItemId) {
+    // NOTE: 메인 행사 상품 불러오기
+    @GetMapping("/event-items")
+    @ResponseBody
+    public BaseResponse<List<EventItem>> getEventItems(@RequestHeader("Access-Token") String accessToken,
+                                                       @RequestParam("page") int pageNum) {
+        // accessToken is null
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
 
-        log.info("/event-items/{eventItemId}");
         try {
+            long userId = jwtService.getUserId(accessToken);
+            log.info("/event-items?page=" + pageNum + " / userId = " + userId);
+            return new BaseResponse<>(eventItemService.getEventItems(userId, pageNum));
+        } catch (BaseException exception) {
+            log.error("event-items: " + exception.getStatus().toString());
+            return new BaseResponse<>(exception.getStatus());
+        }
+    }
 
-            List<EventItem> eventItemList = eventItemService.getEventItem();
+    // NOTE: 특정 행사 상품 클릭 했을 때 -> 추천 행사 상품 리스트 전달
+    @GetMapping("/event-items/{eventItemId}")
+    @ResponseBody
+    public BaseResponse<List<EventItem>> getDetailRecommendedEventItems(@RequestHeader("Access-Token") String accessToken,
+                                                                        @PathVariable Long eventItemId) {
+        // accessToken is null
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+
+        try {
+            long userId = jwtService.getUserId(accessToken);
+            log.info("/event-items/{eventItemId} / userId = " + userId);
+            List<EventItem> eventItemList = eventItemService.getDetailRecommendedEventItems(userId, eventItemId);
+
             log.info(eventItemList.toString());
-             return new BaseResponse<>(eventItemList);
-         } catch (BaseException exception) {
-             log.error("event-items: " + exception.getStatus().toString());
-             return new BaseResponse<>(exception.getStatus());
-         }
-     }
+            return new BaseResponse<>(eventItemList);
+        } catch (BaseException exception) {
+            log.error("event-items: " + exception.getStatus().toString());
+            return new BaseResponse<>(exception.getStatus());
+        }
+    }
+
 }
 
