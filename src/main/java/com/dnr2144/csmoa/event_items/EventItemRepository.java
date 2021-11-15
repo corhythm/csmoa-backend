@@ -155,10 +155,11 @@ public class EventItemRepository {
                 // 좋아요 <-> 싫어요
                 String updateEventItemLikeQuery = "";
                 if (Boolean.TRUE.equals(isLike)) {  // 좋아요 -> 싫어요
-                    updateEventItemLikeQuery = "UPDATE event_item_likes SET is_like = false WHERE user_id = ? AND event_item_id = ?;";
+                    updateEventItemLikeQuery = "UPDATE event_item_likes SET is_like = false, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND event_item_id = ?;";
                 } else {  // 싫어요 -> 좋아요
-                    updateEventItemLikeQuery = "UPDATE event_item_likes SET is_like = true WHERE user_id = ? AND event_item_id = ?;";
+                    updateEventItemLikeQuery = "UPDATE event_item_likes SET is_like = true, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND event_item_id = ?;";
                 }
+                isLike = !isLike;
                 jdbcTemplate.update(updateEventItemLikeQuery, userId, eventItemId);
             }
 

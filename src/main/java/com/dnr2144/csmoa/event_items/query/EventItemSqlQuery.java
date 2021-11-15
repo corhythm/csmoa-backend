@@ -24,7 +24,7 @@ public class EventItemSqlQuery {
             "                    ON event_item_histories.event_item_id = event_items.event_item_id\n" +
             "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS like_count\n" +
             "                     FROM event_item_likes\n" +
-            "                     WHERE status = true\n" +
+            "                     WHERE is_like = true\n" +
             "                     GROUP BY event_item_id) AS event_item_likes\n" +
             "                    ON event_item_likes.event_item_id = event_items.event_item_id\n" +
             "WHERE item_category != '생활용품'\n" +
@@ -53,7 +53,7 @@ public class EventItemSqlQuery {
             "                    ON event_item_histories.event_item_id = event_items.event_item_id\n" +
             "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS like_count\n" +
             "                     FROM event_item_likes\n" +
-            "                     WHERE status = true\n" +
+            "                     WHERE is_like = true\n" +
             "                     GROUP BY event_item_id) AS event_item_likes\n" +
             "                    ON event_item_likes.event_item_id = event_items.event_item_id\n" +
             "WHERE item_category != '생활용품'\n" +
@@ -81,7 +81,7 @@ public class EventItemSqlQuery {
             "                    ON event_item_histories.event_item_id = event_items.event_item_id\n" +
             "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS like_count\n" +
             "                     FROM event_item_likes\n" +
-            "                     WHERE status = true\n" +
+            "                     WHERE is_like = true\n" +
             "                     GROUP BY event_item_id) AS event_item_likes\n" +
             "                    ON event_item_likes.event_item_id = event_items.event_item_id\n" +
             "WHERE event_items.event_item_id = ?;";
