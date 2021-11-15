@@ -18,9 +18,10 @@ public class EventItem {
     private final String itemEventType;
     private final Integer viewCount;
     private final Integer likeCount;
+    private final Boolean isLike;
 
     @Builder
-    public EventItem(Long eventItemId, String itemName, String itemPrice, String itemActualPrice, String itemImageSrc, String itemCategory, String csBrand, String itemEventType, Integer viewCount, Integer likeCount) {
+    public EventItem(Long eventItemId, String itemName, String itemPrice, String itemActualPrice, String itemImageSrc, String itemCategory, String csBrand, String itemEventType, Integer viewCount, Integer likeCount, Boolean isLike) {
         this.eventItemId = eventItemId;
         this.itemName = itemName;
         this.itemPrice = itemPrice;
@@ -31,5 +32,6 @@ public class EventItem {
         this.itemEventType = itemEventType;
         this.viewCount = viewCount;
         this.likeCount = likeCount;
+        this.isLike = isLike;
     }
 }

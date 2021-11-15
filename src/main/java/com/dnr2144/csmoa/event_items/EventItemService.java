@@ -1,8 +1,12 @@
 package com.dnr2144.csmoa.event_items;
 
 import com.dnr2144.csmoa.config.BaseException;
+import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.event_items.domain.GetDetailEventItemRes;
+import com.dnr2144.csmoa.event_items.domain.PostEventItemHistoryAndLikeReq;
+import com.dnr2144.csmoa.event_items.domain.PostEventItemLikeRes;
 import com.dnr2144.csmoa.event_items.model.EventItem;
+import com.dnr2144.csmoa.login.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,16 +17,68 @@ import java.util.List;
 public class EventItemService {
 
     private final EventItemRepository eventItemRepository;
+    private final UserRepository userRepository;
 
-    public List<EventItem> getRecommendedEventItems(long userId) throws BaseException{
+    // 추천 행사 상품 가져오기
+    public List<EventItem> getRecommendedEventItems(long userId) throws BaseException {
+        // 존재하는 사용자인지 체크
+        if (userRepository.checkUserExists(userId) != 1) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
         return eventItemRepository.getRecommendedEventItems(userId);
     }
 
+    // 행사 상품 가져오기
     public List<EventItem> getEventItems(long userId, int pageNum) throws BaseException {
+        // 존재하는 사용자인지 체크
+        if (userRepository.checkUserExists(userId) != 1) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
         return eventItemRepository.getEventItems(userId, pageNum);
     }
 
+    // 세부 행사 제품 정보 + 추천 행사 상품
     public GetDetailEventItemRes getDetailRecommendedEventItems(long userId, long eventItemId) throws BaseException {
+        // 존재하는 사용자인지 체크
+        if (userRepository.checkUserExists(userId) != 1) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        // eventItemId 체크
+        if (eventItemRepository.checkEventItemExists(eventItemId) != 1) {
+            throw new BaseException(BaseResponseStatus.INVALID_EVENT_ITEM_ERROR);
+        }
         return eventItemRepository.getDetailRecommendedEventItem(userId, eventItemId);
+    }
+
+    // 조회 post
+    public Boolean postEventItemHistory(long userId, PostEventItemHistoryAndLikeReq postEventItemHistoryAndLikeReq) throws BaseException {
+        if (userRepository.checkUserExists(userId) != 1) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        // null 체크
+        if (postEventItemHistoryAndLikeReq == null || postEventItemHistoryAndLikeReq.getEventItemId() == null) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        // eventItemId 체크
+        if (eventItemRepository.checkEventItemExists(postEventItemHistoryAndLikeReq.getEventItemId()) != 1) {
+            throw new BaseException(BaseResponseStatus.INVALID_EVENT_ITEM_ERROR);
+        }
+        return eventItemRepository.postEventItemHistory(userId, postEventItemHistoryAndLikeReq.getEventItemId());
+    }
+
+    // 좋아요 post
+    public PostEventItemLikeRes postEventItemLike(long userId, PostEventItemHistoryAndLikeReq postEventItemHistoryAndLikeReq) throws BaseException {
+        if (userRepository.checkUserExists(userId) != 1) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        // null 체크
+        if (postEventItemHistoryAndLikeReq == null || postEventItemHistoryAndLikeReq.getEventItemId() == null) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        // eventItemId 체크
+        if (eventItemRepository.checkEventItemExists(postEventItemHistoryAndLikeReq.getEventItemId()) != 1) {
+            throw new BaseException(BaseResponseStatus.INVALID_EVENT_ITEM_ERROR);
+        }
+        return eventItemRepository.postEventItemLike(userId, postEventItemHistoryAndLikeReq.getEventItemId());
     }
 }

@@ -12,7 +12,11 @@ public class EventItemSqlQuery {
             "       cs_brand,\n" +
             "       item_event_type,\n" +
             "       event_item_histories.view_count,\n" +
-            "       event_item_likes.like_count\n" +
+            "       event_item_likes.like_count,\n" +
+            "       (SELECT temp_event_item_likes.is_like\n" +
+            "        FROM event_item_likes as temp_event_item_likes\n" +
+            "        WHERE temp_event_item_likes.event_item_id = event_items.event_item_id\n" +
+            "          AND temp_event_item_likes.user_id = ?)          AS is_like\n" +
             "FROM event_items\n" +
             "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS view_count\n" +
             "                     FROM event_item_histories\n" +
@@ -37,7 +41,11 @@ public class EventItemSqlQuery {
             "       cs_brand,\n" +
             "       item_event_type,\n" +
             "       event_item_histories.view_count,\n" +
-            "       event_item_likes.like_count\n" +
+            "       event_item_likes.like_count," +
+            "       (SELECT temp_event_item_likes.is_like\n" +
+            "        FROM event_item_likes as temp_event_item_likes\n" +
+            "        WHERE temp_event_item_likes.event_item_id = event_items.event_item_id\n" +
+            "          AND temp_event_item_likes.user_id = ?)          AS is_like\n" +
             "FROM event_items\n" +
             "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS view_count\n" +
             "                     FROM event_item_histories\n" +
@@ -61,7 +69,11 @@ public class EventItemSqlQuery {
             "       cs_brand,\n" +
             "       item_event_type,\n" +
             "       view_count,\n" +
-            "       like_count\n" +
+            "       like_count," +
+            "       (SELECT temp_event_item_likes.is_like\n" +
+            "        FROM event_item_likes as temp_event_item_likes\n" +
+            "        WHERE temp_event_item_likes.event_item_id = event_items.event_item_id\n" +
+            "          AND temp_event_item_likes.user_id = ?)          AS is_like\n" +
             "FROM event_items\n" +
             "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS view_count\n" +
             "                     FROM event_item_histories\n" +
