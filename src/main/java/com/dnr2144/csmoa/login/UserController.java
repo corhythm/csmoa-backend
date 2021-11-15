@@ -3,7 +3,7 @@ package com.dnr2144.csmoa.login;
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponse;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
-import com.dnr2144.csmoa.login.model.*;
+import com.dnr2144.csmoa.login.domain.*;
 import com.dnr2144.csmoa.util.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -3,6 +3,7 @@ package com.dnr2144.csmoa.event_items;
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponse;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
+import com.dnr2144.csmoa.event_items.domain.GetDetailEventItemRes;
 import com.dnr2144.csmoa.event_items.model.EventItem;
 import com.dnr2144.csmoa.util.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -62,8 +63,8 @@ public class EventItemController {
     // NOTE: 특정 행사 상품 클릭 했을 때 -> 추천 행사 상품 리스트 전달
     @GetMapping("/event-items/{eventItemId}")
     @ResponseBody
-    public BaseResponse<List<EventItem>> getDetailRecommendedEventItems(@RequestHeader("Access-Token") String accessToken,
-                                                                        @PathVariable Long eventItemId) {
+    public BaseResponse<GetDetailEventItemRes> getDetailRecommendedEventItems(@RequestHeader("Access-Token") String accessToken,
+                                                                              @PathVariable Long eventItemId) {
         // accessToken is null
         if (accessToken == null) {
             return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
@@ -72,10 +73,11 @@ public class EventItemController {
         try {
             long userId = jwtService.getUserId(accessToken);
             log.info("/event-items/{eventItemId} / userId = " + userId);
-            List<EventItem> eventItemList = eventItemService.getDetailRecommendedEventItems(userId, eventItemId);
+            GetDetailEventItemRes getDetailEventItemInfo
+                    = eventItemService.getDetailRecommendedEventItems(userId, eventItemId);
 
-            log.info(eventItemList.toString());
-            return new BaseResponse<>(eventItemList);
+            log.info(getDetailEventItemInfo.toString());
+            return new BaseResponse<>(getDetailEventItemInfo);
         } catch (BaseException exception) {
             log.error("event-items: " + exception.getStatus().toString());
             return new BaseResponse<>(exception.getStatus());

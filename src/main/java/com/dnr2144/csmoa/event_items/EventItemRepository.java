@@ -2,6 +2,7 @@ package com.dnr2144.csmoa.event_items;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
+import com.dnr2144.csmoa.event_items.domain.GetDetailEventItemRes;
 import com.dnr2144.csmoa.event_items.model.EventItem;
 import com.dnr2144.csmoa.event_items.query.EventItemSqlQuery;
 import lombok.extern.slf4j.Slf4j;
@@ -28,17 +29,20 @@ public class EventItemRepository {
     public List<EventItem> getRecommendedEventItems(Long userId) throws BaseException {
 
         try {
-            return this.jdbcTemplate.query(EventItemSqlQuery.GET_RECOMMENDED_EVENT_ITEMS,
-                    (rs, row) -> new EventItem(
-                            rs.getLong("event_item_id"),
-                            rs.getString("item_name"),
-                            rs.getInt("item_price"),
-                            rs.getInt("item_actual_price"),
-                            rs.getString("item_image_src"),
-                            rs.getString("item_category"),
-                            rs.getString("cs_brand"),
-                            rs.getString("item_event_type")
-                    ));
+            return jdbcTemplate.query(EventItemSqlQuery.GET_RECOMMENDED_EVENT_ITEMS,
+                    (rs, row) -> (EventItem.builder()
+                            .eventItemId(rs.getLong("event_item_id"))
+                            .itemName(rs.getString("item_name"))
+                            .itemPrice(rs.getString("item_price"))
+                            .itemActualPrice(rs.getString("item_actual_price"))
+                            .itemImageSrc(rs.getString("item_image_src"))
+                            .itemCategory(rs.getString("item_category"))
+                            .csBrand(rs.getString("cs_brand"))
+                            .itemEventType(rs.getString("item_event_type"))
+                            .viewCount(rs.getInt("view_count"))
+                            .likeCount(rs.getInt("like_count"))
+                            .build()));
+
         } catch (Exception exception) {
             log.error(exception.getMessage());
             exception.printStackTrace();
@@ -52,17 +56,19 @@ public class EventItemRepository {
         try {
 
             // 이벤트 아이템 리스트 전달달
-           return this.jdbcTemplate.query(EventItemSqlQuery.GET_EVENT_ITEMS,
-                    (rs, row) -> new EventItem(
-                            rs.getLong("event_item_id"),
-                            rs.getString("item_name"),
-                            rs.getInt("item_price"),
-                            rs.getInt("item_actual_price"),
-                            rs.getString("item_image_src"),
-                            rs.getString("item_category"),
-                            rs.getString("cs_brand"),
-                            rs.getString("item_event_type")
-                    ), 14 * pageNum);
+            return jdbcTemplate.query(EventItemSqlQuery.GET_EVENT_ITEMS,
+                    (rs, row) -> (EventItem.builder()
+                            .eventItemId(rs.getLong("event_item_id"))
+                            .itemName(rs.getString("item_name"))
+                            .itemPrice(rs.getString("item_price"))
+                            .itemActualPrice(rs.getString("item_actual_price"))
+                            .itemImageSrc(rs.getString("item_image_src"))
+                            .itemCategory(rs.getString("item_category"))
+                            .csBrand(rs.getString("cs_brand"))
+                            .itemEventType(rs.getString("item_event_type"))
+                            .viewCount(rs.getInt("view_count"))
+                            .likeCount(rs.getInt("like_count"))
+                            .build()), 14 * pageNum);
         } catch (Exception exception) {
             log.error(exception.getMessage());
             exception.printStackTrace();
@@ -70,20 +76,48 @@ public class EventItemRepository {
         }
     }
 
-    public List<EventItem> getDetailRecommendedEventItem(long userId, long eventItemId) throws BaseException {
+    // 세부화면 하단에 추천 상품 가져오기
+    public GetDetailEventItemRes getDetailRecommendedEventItem(long userId, long eventItemId) throws BaseException {
         try {
 
-            return this.jdbcTemplate.query(EventItemSqlQuery.GET_DETAIL_RECOMMENDED_EVENT_ITEMS,
-                    (rs, row) -> new EventItem(
-                            rs.getLong("event_item_id"),
-                            rs.getString("item_name"),
-                            rs.getInt("item_price"),
-                            rs.getInt("item_actual_price"),
-                            rs.getString("item_image_src"),
-                            rs.getString("item_category"),
-                            rs.getString("cs_brand"),
-                            rs.getString("item_event_type")
-                    ));
+            Integer itemPrice = jdbcTemplate.queryForObject("SELECT item_price FROM event_items " +
+                    "WHERE event_item_id = ?", Integer.class, eventItemId);
+
+            if (itemPrice == null) {
+                throw new BaseException(BaseResponseStatus.INVALID_EVENT_ITEM_ERROR);
+            }
+
+            EventItem detailEventItem = jdbcTemplate.queryForObject(EventItemSqlQuery.GET_DETAIL_EVENT_ITEM,
+                    (rs, row) -> EventItem.builder()
+                            .eventItemId(rs.getLong("event_item_id"))
+                            .itemName(rs.getString("item_name"))
+                            .itemPrice(rs.getString("item_price"))
+                            .itemActualPrice(rs.getString("item_actual_price"))
+                            .itemImageSrc(rs.getString("item_image_src"))
+                            .itemCategory(rs.getString("item_category"))
+                            .csBrand(rs.getString("cs_brand"))
+                            .itemEventType(rs.getString("item_event_type"))
+                            .viewCount(rs.getInt("view_count"))
+                            .likeCount(rs.getInt("like_count"))
+                            .build(), eventItemId);
+
+            List<EventItem> detailRecommendEventItem = jdbcTemplate.query(EventItemSqlQuery.GET_DETAIL_RECOMMENDED_EVENT_ITEMS,
+                    (rs, row) -> (EventItem.builder()
+                            .eventItemId(rs.getLong("event_item_id"))
+                            .itemName(rs.getString("item_name"))
+                            .itemPrice(rs.getString("item_price"))
+                            .itemActualPrice(rs.getString("item_actual_price"))
+                            .itemImageSrc(rs.getString("item_image_src"))
+                            .itemCategory(rs.getString("item_category"))
+                            .csBrand(rs.getString("cs_brand"))
+                            .itemEventType(rs.getString("item_event_type"))
+                            .build()), itemPrice + 1000, itemPrice + 2000);
+
+            return GetDetailEventItemRes.builder()
+                    .detailEventItem(detailEventItem)
+                    .detailRecommendedEventItems(detailRecommendEventItem)
+                    .build();
+
         } catch (Exception exception) {
             log.error(exception.getMessage());
             exception.printStackTrace();

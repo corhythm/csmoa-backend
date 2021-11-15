@@ -1,6 +1,7 @@
 package com.dnr2144.csmoa.event_items;
 
 import com.dnr2144.csmoa.config.BaseException;
+import com.dnr2144.csmoa.event_items.domain.GetDetailEventItemRes;
 import com.dnr2144.csmoa.event_items.model.EventItem;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,7 @@ public class EventItemService {
         return eventItemRepository.getEventItems(userId, pageNum);
     }
 
-    public List<EventItem> getDetailRecommendedEventItems(long userId, long eventItemId) throws BaseException {
+    public GetDetailEventItemRes getDetailRecommendedEventItems(long userId, long eventItemId) throws BaseException {
         return eventItemRepository.getDetailRecommendedEventItem(userId, eventItemId);
     }
 }

@@ -28,7 +28,8 @@ public enum BaseResponseStatus {
     INVALID_OAUTH_PROVIDER(false, 214, "허용되지 않은 OAUTH 공급자입니다."),
     FAILED_TO_UPLOAD_USER_PROFILE_IMAGE(false, 215, "프로필 이미지를 업로드하는 데 실패했습니다."),
 
-
+    // 220번 대: 행사 상품 오류
+    INVALID_EVENT_ITEM_ERROR(false, 220, "존재하지 않는 행사상품입니다."),
     /**
      * 400 : Database, Server 오류
      */

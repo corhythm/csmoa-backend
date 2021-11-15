@@ -1,4 +1,4 @@
-package com.dnr2144.csmoa.login.model;
+package com.dnr2144.csmoa.login.domain.model;
 
 import lombok.Builder;
 import lombok.Getter;

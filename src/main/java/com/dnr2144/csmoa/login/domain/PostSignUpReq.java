@@ -1,8 +1,6 @@
-package com.dnr2144.csmoa.login.model;
+package com.dnr2144.csmoa.login.domain;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
