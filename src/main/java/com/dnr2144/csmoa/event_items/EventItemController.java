@@ -12,9 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,7 +28,10 @@ public class EventItemController {
     // NOTE: 추천 행사 상품 불러오기
     @GetMapping("/recommended-event-items")
     @ResponseBody
-    public BaseResponse<List<EventItem>> getRecommendedEventItems(@RequestHeader("Access-Token") String accessToken) {
+    public BaseResponse<List<EventItem>> getRecommendedEventItems(@RequestHeader("Access-Token") String accessToken,
+                                                                  @Nullable @RequestParam("cs-brand") List<String> csBrands,
+                                                                  @Nullable @RequestParam("event-type") List<String> eventTypes,
+                                                                  @Nullable @RequestParam("category") List<String> categories) {
         // accessToken is null
         if (accessToken == null) {
             return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
@@ -35,9 +39,18 @@ public class EventItemController {
         try {
             long userId = jwtService.getUserId(accessToken);
             log.info("/recommended-event-items / userId = " + userId);
-            return new BaseResponse<>(eventItemService.getRecommendedEventItems(userId));
+
+            System.out.println("csBrands = " + csBrands);
+            System.out.println("eventTypes = " + eventTypes);
+            System.out.println("categories = " + categories);
+
+            List<EventItem> recommendedEventItems
+                    = eventItemService.getRecommendedEventItems(userId, csBrands, eventTypes, categories);
+            log.info("recommendedEventItems = " + recommendedEventItems.toString());
+            return new BaseResponse<>(recommendedEventItems);
         } catch (BaseException exception) {
-            log.error("event-items: " + exception.getMessage());
+            log.error("recommended-event-items: " + exception.getMessage());
+            exception.printStackTrace();
             return new BaseResponse<>(exception.getStatus());
         }
     }
@@ -57,6 +70,7 @@ public class EventItemController {
             return new BaseResponse<>(eventItemService.getEventItems(userId, pageNum));
         } catch (BaseException exception) {
             log.error("event-items: " + exception.getMessage());
+            exception.printStackTrace();
             return new BaseResponse<>(exception.getStatus());
         }
     }
@@ -80,6 +94,7 @@ public class EventItemController {
             return new BaseResponse<>(getDetailEventItemInfo);
         } catch (BaseException exception) {
             log.error("event-items: " + exception.getMessage());
+            exception.printStackTrace();
             return new BaseResponse<>(exception.getStatus());
         }
     }
@@ -88,7 +103,7 @@ public class EventItemController {
     @PostMapping("/event-items/history")
     @ResponseBody
     public BaseResponse<Boolean> postEventItemHistory(@RequestHeader("Access-Token") String accessToken,
-                                                                                @RequestBody PostEventItemHistoryAndLikeReq postEventItemHistoryAndLikeReq) {
+                                                      @RequestBody PostEventItemHistoryAndLikeReq postEventItemHistoryAndLikeReq) {
         if (accessToken == null) {
             return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
         }
@@ -120,7 +135,28 @@ public class EventItemController {
         } catch (BaseException exception) {
             exception.printStackTrace();
             log.error("postEventItemLike: " + exception.getMessage());
+            exception.printStackTrace();
             return new BaseResponse<>(exception.getStatus());
+        }
+    }
+
+    @GetMapping("test")
+    @ResponseBody
+    public void temp(@Nullable @RequestParam("cs-brand") List<String> csBrand, @Nullable @RequestParam("event-type") List<String> eventType,
+                     @Nullable @RequestParam List<String> category) {
+
+        if (csBrand != null) {
+            log.info(csBrand.toString());
+        }
+
+        if (eventType != null) {
+            log.info(eventType.toString());
+            if (eventType.contains("1+1"))
+                log.info("contains 1+1");
+        }
+
+        if (category != null) {
+            log.info(category.toString());
         }
     }
 

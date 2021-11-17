@@ -16,7 +16,7 @@ public class EventItemSqlQuery {
             "       (SELECT temp_event_item_likes.is_like\n" +
             "        FROM event_item_likes as temp_event_item_likes\n" +
             "        WHERE temp_event_item_likes.event_item_id = event_items.event_item_id\n" +
-            "          AND temp_event_item_likes.user_id = ?)          AS is_like\n" +
+            "          AND temp_event_item_likes.user_id = :userId)          AS is_like\n" +
             "FROM event_items\n" +
             "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS view_count\n" +
             "                     FROM event_item_histories\n" +
@@ -27,9 +27,12 @@ public class EventItemSqlQuery {
             "                     WHERE is_like = true\n" +
             "                     GROUP BY event_item_id) AS event_item_likes\n" +
             "                    ON event_item_likes.event_item_id = event_items.event_item_id\n" +
-            "WHERE item_category != '생활용품'\n" +
+            "WHERE event_items.item_category != '생활용품'\n" +
+            "  AND event_items.cs_brand IN (:csBrands)\n" +
+            "  AND event_items.item_event_type IN (:eventTypes)\n" +
+            "  AND event_items.item_category IN (:categories)" +
             "ORDER BY  (event_item_likes.like_count + event_item_histories.view_count) DESC\n" +
-            "LIMIT 10;";
+            "LIMIT :pageNum, 10;";
 
     // 일반 행사 상품 가져오기
     public static String GET_EVENT_ITEMS = "SELECT event_items.event_item_id,\n" +

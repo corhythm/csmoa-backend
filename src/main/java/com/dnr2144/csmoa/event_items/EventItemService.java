@@ -20,12 +20,13 @@ public class EventItemService {
     private final UserRepository userRepository;
 
     // 추천 행사 상품 가져오기
-    public List<EventItem> getRecommendedEventItems(long userId) throws BaseException {
+    public List<EventItem> getRecommendedEventItems(long userId, List<String> csBrands,
+                                                    List<String> eventTypes, List<String> categories) throws BaseException {
         // 존재하는 사용자인지 체크
         if (userRepository.checkUserExists(userId) != 1) {
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
         }
-        return eventItemRepository.getRecommendedEventItems(userId);
+        return eventItemRepository.getRecommendedEventItems(userId, csBrands, eventTypes, categories);
     }
 
     // 행사 상품 가져오기

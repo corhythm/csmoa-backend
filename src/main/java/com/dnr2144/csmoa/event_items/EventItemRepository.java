@@ -9,29 +9,46 @@ import com.dnr2144.csmoa.event_items.query.EventItemSqlQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 @Repository
 @Slf4j
 public class EventItemRepository {
 
     private JdbcTemplate jdbcTemplate;
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
     public void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    @Autowired
+    void setDataSource2(DataSource dataSource) {
+        this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+    }
+
 
     // 추천 행사 상품 받아오기
-    public List<EventItem> getRecommendedEventItems(Long userId) throws BaseException {
-
+    public List<EventItem> getRecommendedEventItems(long userId, List<String> csBrands,
+                                                    List<String> eventTypes, List<String> categories) throws BaseException {
         try {
-            return jdbcTemplate.query(EventItemSqlQuery.GET_RECOMMENDED_EVENT_ITEMS,
-                    (rs, row) -> (EventItem.builder()
+            Map<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("csBrands", csBrands);
+            params.put("eventTypes", eventTypes);
+            params.put("categories", categories);
+            params.put("pageNum", 0); // new Random().nextInt(10)
+
+            return namedParameterJdbcTemplate.query(EventItemSqlQuery.GET_RECOMMENDED_EVENT_ITEMS,
+                    params, (rs, row) -> (EventItem.builder()
                             .eventItemId(rs.getLong("event_item_id"))
                             .itemName(rs.getString("item_name"))
                             .itemPrice(rs.getString("item_price"))
@@ -43,7 +60,7 @@ public class EventItemRepository {
                             .viewCount(rs.getInt("view_count"))
                             .likeCount(rs.getInt("like_count"))
                             .isLike(rs.getBoolean("is_like"))
-                            .build()), userId);
+                            .build()));
 
         } catch (Exception exception) {
             log.error(exception.getMessage());
