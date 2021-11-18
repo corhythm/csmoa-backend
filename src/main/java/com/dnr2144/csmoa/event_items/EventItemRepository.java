@@ -46,6 +46,7 @@ public class EventItemRepository {
             params.put("eventTypes", eventTypes);
             params.put("categories", categories);
             params.put("pageNum", 0); // new Random().nextInt(10)
+            params.put("pageSize", 10);
 
             return namedParameterJdbcTemplate.query(EventItemSqlQuery.GET_RECOMMENDED_EVENT_ITEMS,
                     params, (rs, row) -> (EventItem.builder()
@@ -81,6 +82,7 @@ public class EventItemRepository {
             params.put("eventTypes", eventTypes);
             params.put("categories", categories);
             params.put("pageNum", 0); // new Random().nextInt(10)
+            params.put("pageSize", 10);
 
             return namedParameterJdbcTemplate.query(EventItemSqlQuery.GET_EVENT_ITEMS,
                     params, (rs, row) -> (EventItem.builder()

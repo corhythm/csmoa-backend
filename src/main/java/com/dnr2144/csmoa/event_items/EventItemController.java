@@ -56,6 +56,7 @@ public class EventItemController {
     }
 
     // NOTE: 메인 행사 상품 불러오기
+    // 데이터가 더는 없으면 어떻게 처리해야 할까. 계속 똑같은 데이터 페이징하고 있음
     @GetMapping("/event-items")
     @ResponseBody
     public BaseResponse<List<EventItem>> getEventItems(@RequestHeader("Access-Token") String accessToken,

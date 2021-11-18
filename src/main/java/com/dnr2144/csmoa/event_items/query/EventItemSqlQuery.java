@@ -32,7 +32,7 @@ public class EventItemSqlQuery {
             "  AND event_items.item_event_type IN (:eventTypes)\n" +
             "  AND event_items.item_category IN (:categories)" +
             "ORDER BY  (event_item_likes.like_count + event_item_histories.view_count) DESC\n" +
-            "LIMIT :pageNum, 10;";
+            "LIMIT :pageNum, :pageSize;";
 
     // 일반 행사 상품 가져오기
     public static String GET_EVENT_ITEMS = "SELECT event_items.event_item_id,\n" +
@@ -63,7 +63,7 @@ public class EventItemSqlQuery {
             "  AND event_items.cs_brand IN (:csBrands)\n" +
             "  AND event_items.item_event_type IN (:eventTypes)\n" +
             "  AND event_items.item_category IN (:categories)" +
-            "LIMIT :pageNum, 14;";
+            "LIMIT :pageNum, :pageSize;";
 
     // 세부 화면 행사 제품 가져오기
     public static String GET_DETAIL_EVENT_ITEM = "SELECT event_items.event_item_id,\n" +
