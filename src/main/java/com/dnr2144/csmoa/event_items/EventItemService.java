@@ -9,6 +9,7 @@ import com.dnr2144.csmoa.event_items.model.EventItem;
 import com.dnr2144.csmoa.login.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class EventItemService {
     private final UserRepository userRepository;
 
     // 추천 행사 상품 가져오기
+    @Transactional
     public List<EventItem> getRecommendedEventItems(long userId, List<String> csBrands,
                                                     List<String> eventTypes, List<String> categories) throws BaseException {
         // 존재하는 사용자인지 체크
@@ -30,12 +32,14 @@ public class EventItemService {
     }
 
     // 행사 상품 가져오기
-    public List<EventItem> getEventItems(long userId, int pageNum) throws BaseException {
+    @Transactional
+    public List<EventItem> getEventItems(long userId, int pageNum, List<String> csBrands,
+                                         List<String> eventTypes, List<String> categories) throws BaseException {
         // 존재하는 사용자인지 체크
         if (userRepository.checkUserExists(userId) != 1) {
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
         }
-        return eventItemRepository.getEventItems(userId, pageNum);
+        return eventItemRepository.getEventItems(userId, pageNum, csBrands, eventTypes, categories);
     }
 
     // 세부 행사 제품 정보 + 추천 행사 상품

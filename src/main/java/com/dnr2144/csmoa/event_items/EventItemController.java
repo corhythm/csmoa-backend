@@ -40,9 +40,9 @@ public class EventItemController {
             long userId = jwtService.getUserId(accessToken);
             log.info("/recommended-event-items / userId = " + userId);
 
-            System.out.println("csBrands = " + csBrands);
-            System.out.println("eventTypes = " + eventTypes);
-            System.out.println("categories = " + categories);
+            System.out.println("(/recommended-event-items) csBrands = " + csBrands);
+            System.out.println("(/recommended-event-items) eventTypes = " + eventTypes);
+            System.out.println("(/recommended-event-items) categories = " + categories);
 
             List<EventItem> recommendedEventItems
                     = eventItemService.getRecommendedEventItems(userId, csBrands, eventTypes, categories);
@@ -59,7 +59,14 @@ public class EventItemController {
     @GetMapping("/event-items")
     @ResponseBody
     public BaseResponse<List<EventItem>> getEventItems(@RequestHeader("Access-Token") String accessToken,
-                                                       @RequestParam("page") int pageNum) {
+                                                       @RequestParam("page") int pageNum,
+                                                       @Nullable @RequestParam("cs-brand") List<String> csBrands,
+                                                       @Nullable @RequestParam("event-type") List<String> eventTypes,
+                                                       @Nullable @RequestParam("category") List<String> categories) {
+        System.out.println("(/event-items) csBrands = " + csBrands);
+        System.out.println("(/event-items) eventTypes = " + eventTypes);
+        System.out.println("(/event-items) categories = " + categories);
+
         // accessToken is null
         if (accessToken == null) {
             return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
@@ -67,7 +74,7 @@ public class EventItemController {
         try {
             long userId = jwtService.getUserId(accessToken);
             log.info("/event-items?page=" + pageNum + " / userId = " + userId);
-            return new BaseResponse<>(eventItemService.getEventItems(userId, pageNum));
+            return new BaseResponse<>(eventItemService.getEventItems(userId, pageNum, csBrands, eventTypes, categories));
         } catch (BaseException exception) {
             log.error("event-items: " + exception.getMessage());
             exception.printStackTrace();
