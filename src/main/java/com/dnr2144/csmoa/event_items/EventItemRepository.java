@@ -5,7 +5,6 @@ import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.event_items.domain.GetDetailEventItemRes;
 import com.dnr2144.csmoa.event_items.domain.PostEventItemLikeRes;
 import com.dnr2144.csmoa.event_items.model.EventItem;
-import com.dnr2144.csmoa.event_items.query.EventItemSqlQuery;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,7 +15,6 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 @Repository
 @Slf4j
@@ -26,12 +24,8 @@ public class EventItemRepository {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
-    public void setDataSource(DataSource dataSource) {
+    void setDataSource(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-    }
-
-    @Autowired
-    void setNamedDataSource(DataSource dataSource) {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 

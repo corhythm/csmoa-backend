@@ -30,6 +30,9 @@ public enum BaseResponseStatus {
 
     // 220번 대: 행사 상품 오류
     INVALID_EVENT_ITEM_ERROR(false, 220, "존재하지 않는 행사상품입니다."),
+
+    // 230번 대: 리뷰 에러
+
     /**
      * 400 : Database, Server 오류
      */

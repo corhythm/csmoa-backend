@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,7 +22,6 @@ import java.util.UUID;
 public class FirebaseStorageManager {
 
     private final String BUCKET_NAME = "csmoa-38f5b.appspot.com";
-    private final String PROFILE = "profile";
     private final String RECIPE = "recipe";
     private final String REVIEW = "review";
 
@@ -48,7 +49,8 @@ public class FirebaseStorageManager {
     public String saveProfileImage(Long userId, MultipartFile multipartFile) throws IOException {
         Bucket bucket = StorageClient.getInstance().bucket();
         String fileName = userId + "_" + UUID.randomUUID();
-        String filePath = PROFILE + "/" + fileName;
+        String profile = "profile";
+        String filePath = profile + "/" + fileName;
         Blob blob = bucket.create(filePath, multipartFile.getBytes(), multipartFile.getContentType());
 
         log.info("bucket name = " + bucket.getName());
@@ -58,9 +60,28 @@ public class FirebaseStorageManager {
         log.info("fileName = " + fileName);
 
         // "https://firebasestorage.googleapis.com/v0/b/<my bucket name>/o/<fileName>?alt=media"
-        String absoluteFileUrl = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s%%2F%s?alt=media", BUCKET_NAME, PROFILE, fileName);
-        log.info(absoluteFileUrl);
+        String absoluteFilePathUrl = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s%%2F%s?alt=media",
+                BUCKET_NAME, profile, fileName);
+        log.info(absoluteFilePathUrl);
 
-        return absoluteFileUrl;
+        return absoluteFilePathUrl;
+    }
+
+    public List<String> saveReviewImages(long userId, List<MultipartFile> reviewImages) throws IOException {
+        Bucket bucket = StorageClient.getInstance().bucket();
+        List<String> reviewImageUrls = new ArrayList();
+
+        for (MultipartFile reviewImage : reviewImages) {
+            String fileName = userId + "_" + UUID.randomUUID();
+            String recipe = "review";
+            String filePath = recipe + "/" + fileName;
+            // save
+            bucket.create(filePath, reviewImage.getBytes(), reviewImage.getContentType());
+            String absoluteFilePathUrl = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s%%2F%s?alt=media",
+                    BUCKET_NAME, recipe, fileName);
+            reviewImageUrls.add(absoluteFilePathUrl);
+        }
+
+        return reviewImageUrls;
     }
 }

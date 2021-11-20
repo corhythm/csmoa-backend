@@ -1,4 +1,4 @@
-package com.dnr2144.csmoa.login.query;
+package com.dnr2144.csmoa.login;
 
 public class UserSqlQuery {
 

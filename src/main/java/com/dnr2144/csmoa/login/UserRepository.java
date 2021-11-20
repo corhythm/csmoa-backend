@@ -5,7 +5,6 @@ import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.firebase.FirebaseStorageManager;
 import com.dnr2144.csmoa.login.domain.*;
 import com.dnr2144.csmoa.login.domain.model.CheckAccount;
-import com.dnr2144.csmoa.login.query.UserSqlQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
