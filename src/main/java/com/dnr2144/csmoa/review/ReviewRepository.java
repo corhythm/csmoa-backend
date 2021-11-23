@@ -5,6 +5,7 @@ import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.firebase.FirebaseStorageManager;
 import com.dnr2144.csmoa.review.domain.PostReviewReq;
 import com.dnr2144.csmoa.review.domain.PostReviewRes;
+import com.dnr2144.csmoa.review.domain.model.Review;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +18,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -83,5 +81,57 @@ public class ReviewRepository {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
+
+    public List<Review> getBestReviews(long userId) throws BaseException {
+        try {
+            return jdbcTemplate.query(ReviewSqlQuery.GET_BEST_REVIEWS,
+                    (rs, row) -> Review.builder()
+                            .reviewId(rs.getLong("review_id"))
+                            .userId(rs.getLong("user_id"))
+                            .itemName(rs.getString("item_name"))
+                            .itemPrice(rs.getString("item_price"))
+                            .itemStarScore(rs.getFloat("item_star_score"))
+                            .csBrand(rs.getString("cs_brand"))
+                            .content(rs.getString("content"))
+                            .createdAt(rs.getString("create_at"))
+                            .likeNum(rs.getInt("like_num"))
+                            .viewNum(rs.getInt("view_num"))
+                            .commentNum(rs.getInt("comment_num"))
+                            .itemImageUrl(rs.getString("image_src"))
+                            .isLike(rs.getBoolean("is_like"))
+                            .build(), userId, new Random().nextInt(30));
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            log.info("(in ReviewRepository, getBestReviews) " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    public List<Review> getReviews(long userId, int pageNum) throws BaseException {
+        try {
+            return jdbcTemplate.query(ReviewSqlQuery.GET_REVIEWS,
+                    (rs, row) -> Review.builder()
+                            .reviewId(rs.getLong("review_id"))
+                            .userId(rs.getLong("user_id"))
+                            .itemName(rs.getString("item_name"))
+                            .itemPrice(rs.getString("item_price"))
+                            .itemStarScore(rs.getFloat("item_star_score"))
+                            .csBrand(rs.getString("cs_brand"))
+                            .content(rs.getString("content"))
+                            .createdAt(rs.getString("create_at"))
+                            .likeNum(rs.getInt("like_num"))
+                            .viewNum(rs.getInt("view_num"))
+                            .commentNum(rs.getInt("comment_num"))
+                            .itemImageUrl(rs.getString("image_src"))
+                            .isLike(rs.getBoolean("is_like"))
+                            .build(), userId, (pageNum - 1) * 5);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            log.info("(in ReviewRepository, getReviews) " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+
 
 }

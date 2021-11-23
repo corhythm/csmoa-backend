@@ -75,7 +75,7 @@ public class EventItemRepository {
             params.put("csBrands", csBrands);
             params.put("eventTypes", eventTypes);
             params.put("categories", categories);
-            params.put("pageNum", 0); // new Random().nextInt(10)
+            params.put("pageNum", pageNum * 10); // new Random().nextInt(10)
             params.put("pageSize", 10);
 
             return namedParameterJdbcTemplate.query(EventItemSqlQuery.GET_EVENT_ITEMS,
