@@ -5,6 +5,8 @@ import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.login.UserRepository;
 import com.dnr2144.csmoa.review.domain.PostReviewReq;
 import com.dnr2144.csmoa.review.domain.PostReviewRes;
+import com.dnr2144.csmoa.review.domain.model.Comment;
+import com.dnr2144.csmoa.review.domain.model.DetailedReview;
 import com.dnr2144.csmoa.review.domain.model.Review;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -55,13 +57,28 @@ public class ReviewService {
         if (userId == null || pageNum == null || pageNum < 1) { // 입력값 null 체크
             throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
         }
-
-        // 존재하지 않는 유저일 때
-        if (userRepository.checkUserExists(userId) == 0) {
+        if (userRepository.checkUserExists(userId) == 0) { // 존재하지 않는 유저일 때
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
         }
-
         return reviewRepository.getReviews(userId, pageNum);
     }
 
+    @Transactional
+    public DetailedReview getDetailedReview(Long reviewId, Long userId) throws BaseException {
+        if (reviewId == null || userId == null || reviewId < 1 || userId < 1) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        if (userRepository.checkUserExists(userId) == 0) { // 존재하지 않는 유저일 때
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        return reviewRepository.getDetailedReview(reviewId, userId);
+    }
+
+    @Transactional
+    public List<Comment> getComments(Long reviewId, Integer pageNum) throws BaseException {
+        if (reviewId == null || pageNum == null || reviewId < 1 || pageNum < 1) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        return reviewRepository.getComments(reviewId, pageNum);
+    }
 }
