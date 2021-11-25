@@ -44,7 +44,7 @@ public class ReviewRepository {
 
             jdbcTemplate.update((PreparedStatementCreator) con -> {
                 PreparedStatement preparedStatement = con.prepareStatement(
-                        ReviewSqlQuery.INSERT_REVIEW, new String[]{"user_id"}
+                        ReviewSqlQuery.INSERT_REVIEW, new String[]{"review_id"}
                 );
                 preparedStatement.setLong(1, userId);
                 preparedStatement.setString(2, postReviewReq.getTitle());
@@ -58,6 +58,7 @@ public class ReviewRepository {
 
             // Get PK
             long reviewId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+            log.info("생성된 리뷰 아이디 = " + reviewId);
 
             // 파이어베이스에 리뷰 이미지 넣기
             List<String> reviewImagesAbsoluteUrls =
@@ -192,6 +193,7 @@ public class ReviewRepository {
         try {
             return jdbcTemplate.query(ReviewSqlQuery.GET_PARENT_COMMENTS, (rs, row) -> Comment.builder()
                     .reviewCommentId(rs.getLong("review_comment_id"))
+                    .reviewId(rs.getLong("review_id"))
                     .userId(rs.getLong("user_id"))
                     .nickname(rs.getString("nickname"))
                     .userProfileImageUrl(rs.getString("profile_image_url"))
@@ -203,16 +205,41 @@ public class ReviewRepository {
                     .build(), reviewId, (pageNum - 1) * 5);
         } catch (Exception ex) {
             ex.printStackTrace();
-            log.info("In ReviewRepository, getComments" + ex.getMessage());
+            log.info("In ReviewRepository, getParentComments" + ex.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
 
-    // 해당 commentId는 parent이므로 이걸 bundleId로 사용하면 됨
-    public List<Comment> getChildComments(long commentId, int pageNum) throws BaseException{
+    // NOTE: 부모 댓글 등록
+    public Comment postParentComment(long reviewId, long userId, String content) throws BaseException {
         try {
-            return jdbcTemplate.query(ReviewSqlQuery.GET_CHILD_COMMENTS, (rs, row) -> Comment.builder()
+            String insertParentCommentQuery = "INSERT INTO review_comments " +
+                    "(user_id, review_id, bundle_id, depth, comment_content) VALUE (?, ?, ?, ?, ?)";
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+
+            jdbcTemplate.update((PreparedStatementCreator) con -> {
+                PreparedStatement preparedStatement = con.prepareStatement(
+                        insertParentCommentQuery, new String[]{"review_comment_id"}
+                );
+                preparedStatement.setLong(1, userId);
+                preparedStatement.setLong(2, reviewId);
+                preparedStatement.setLong(3, -1);
+                preparedStatement.setInt(4, 0);
+                preparedStatement.setString(5, content);
+
+                return preparedStatement;
+            }, keyHolder);
+
+            // NOTE: bundleId 업데이트
+            String updateCommentBundleIdQuery = "UPDATE review_comments SET bundle_id = review_comment_id WHERE review_comment_id = LAST_INSERT_ID();";
+            jdbcTemplate.update(updateCommentBundleIdQuery);
+
+            // Get PK
+            long reviewCommentId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+
+            return jdbcTemplate.queryForObject(ReviewSqlQuery.RETURN_INSERTED_COMMENT, (rs, row) -> Comment.builder()
                     .reviewCommentId(rs.getLong("review_comment_id"))
+                    .reviewId(rs.getLong("review_id"))
                     .userId(rs.getLong("user_id"))
                     .nickname(rs.getString("nickname"))
                     .userProfileImageUrl(rs.getString("profile_image_url"))
@@ -220,10 +247,83 @@ public class ReviewRepository {
                     .commentContent(rs.getString("comment_content"))
                     .createdAt(rs.getString("created_at"))
                     .depth(rs.getInt("depth"))
-                    .build(), commentId, (pageNum - 1) * 5);
+                    .build(), reviewCommentId);
         } catch (Exception ex) {
             ex.printStackTrace();
-            log.info("In ReviewRepository, getNestedComments" + ex.getMessage());
+            log.info("In ReviewRepository, postParentComment" + ex.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // NOTE: 해당 commentId는 parent이므로 이걸 bundleId로 사용하면 됨
+    public List<Comment> getChildComments(long bundleId, int pageNum) throws BaseException{
+        try {
+            return jdbcTemplate.query(ReviewSqlQuery.GET_CHILD_COMMENTS, (rs, row) -> Comment.builder()
+                    .reviewCommentId(rs.getLong("review_comment_id"))
+                    .reviewId(rs.getLong("review_id"))
+                    .userId(rs.getLong("user_id"))
+                    .nickname(rs.getString("nickname"))
+                    .userProfileImageUrl(rs.getString("profile_image_url"))
+                    .bundleId(rs.getLong("bundle_id"))
+                    .commentContent(rs.getString("comment_content"))
+                    .createdAt(rs.getString("created_at"))
+                    .depth(rs.getInt("depth"))
+                    .build(), bundleId, (pageNum - 1) * 5);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.info("In ReviewRepository, getChildComments" + ex.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    public Comment postChildComment(long reviewId, long bundleId, long userId, String content) throws BaseException {
+        try {
+            String insertChildCommentQuery = "INSERT INTO review_comments " +
+                    "(user_id, review_id, bundle_id, depth, comment_content) VALUE (?, ?, ?, ?, ?)";
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+
+            jdbcTemplate.update((PreparedStatementCreator) con -> {
+                PreparedStatement preparedStatement = con.prepareStatement(
+                        insertChildCommentQuery, new String[]{"review_comment_id"}
+                );
+                preparedStatement.setLong(1, userId);
+                preparedStatement.setLong(2, reviewId);
+                preparedStatement.setLong(3, bundleId);
+                preparedStatement.setInt(4, 0);
+                preparedStatement.setString(5, content);
+
+                return preparedStatement;
+            }, keyHolder);
+
+            // Get PK
+            long reviewCommentId = Objects.requireNonNull(keyHolder.getKey()).longValue();
+
+            return jdbcTemplate.queryForObject(ReviewSqlQuery.RETURN_INSERTED_COMMENT, (rs, row) -> Comment.builder()
+                    .reviewCommentId(rs.getLong("review_comment_id"))
+                    .reviewId(rs.getLong("review_id"))
+                    .userId(rs.getLong("user_id"))
+                    .nickname(rs.getString("nickname"))
+                    .userProfileImageUrl(rs.getString("profile_image_url"))
+                    .bundleId(rs.getLong("bundle_id"))
+                    .commentContent(rs.getString("comment_content"))
+                    .createdAt(rs.getString("created_at"))
+                    .depth(rs.getInt("depth"))
+                    .build(), reviewCommentId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.info("In ReviewRepository, postChildComment" + ex.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // NOTE: 해당 리뷰에 해당 bundleId를 가진 부모 댓글이 있는지 체크
+    public Integer checkExistsParentCommentInThatReview(long reviewId, long bundleId) throws BaseException{
+        try {
+            String query = "SELECT EXISTS(SELECT * FROM review_comments WHERE review_id = ? AND bundle_id = ? AND depth = 1)";
+            return jdbcTemplate.queryForObject(query, Integer.class, reviewId, bundleId);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.info("In ReviewRepository, checkExistsParentCommentInThatReview" + ex.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }

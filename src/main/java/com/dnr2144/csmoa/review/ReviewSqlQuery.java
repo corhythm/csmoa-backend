@@ -134,6 +134,7 @@ public class ReviewSqlQuery {
 
     public static String GET_PARENT_COMMENTS =
             "SELECT review_comment_id,\n" +
+                    "       review_comments.review_id,\n" +
                     "       review_comments.user_id,\n" +
                     "       users.nickname,\n" +
                     "       users.profile_image_url,\n" +
@@ -160,6 +161,7 @@ public class ReviewSqlQuery {
 
     public static String GET_CHILD_COMMENTS =
             "SELECT review_comment_id,\n" +
+                    "       review_comments.review_id,\n" +
                     "       review_comments.user_id,\n" +
                     "       users.nickname,\n" +
                     "       users.profile_image_url,\n" +
@@ -180,4 +182,27 @@ public class ReviewSqlQuery {
                     "WHERE bundle_id = ? AND depth = 0\n" +
                     "ORDER BY review_comments.review_comment_id\n" +
                     "LIMIT ?, 5";
+
+    public static String RETURN_INSERTED_COMMENT =
+            "SELECT review_comment_id,\n" +
+                    "       review_comments.review_id,\n" +
+                    "       review_comments.user_id,\n" +
+                    "       users.nickname,\n" +
+                    "       users.profile_image_url,\n" +
+                    "       bundle_id,\n" +
+                    "       comment_content,\n" +
+                    "       CASE\n" +
+                    "           WHEN (TIMESTAMPDIFF(YEAR, review_comments.created_at, NOW()) > 1) # 일 년 지나면\n" +
+                    "               THEN DATE_FORMAT(review_comments.created_at, '%y.%m.%d %H:%i')\n" +
+                    "           WHEN (TIMESTAMPDIFF(HOUR, review_comments.created_at, NOW()) > 24) # 하루 지나면\n" +
+                    "               THEN DATE_FORMAT(review_comments.created_at, '%m.%d %H:%i')\n" +
+                    "           WHEN (TIMESTAMPDIFF(MINUTE, review_comments.created_at, NOW()) > 60) # 한 시간 지나면\n" +
+                    "               THEN DATE_FORMAT(review_comments.created_at, '%H:%i')\n" +
+                    "           ELSE CONCAT(TIMESTAMPDIFF(MINUTE, review_comments.created_at, NOW()), '분 전') # 한 시간 안 지났으면\n" +
+                    "           END AS created_at,\n" +
+                    "       review_comments.depth\n" +
+                    "FROM review_comments\n" +
+                    "         INNER JOIN users ON users.user_id = review_comments.user_id\n" +
+                    "WHERE review_comments.review_comment_id = ?\n" +
+                    "ORDER BY review_comments.review_comment_id";
 }

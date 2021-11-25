@@ -8,6 +8,7 @@ import lombok.ToString;
 @Getter
 public class Comment {
     private final Long reviewCommentId;
+    private final Long reviewId;
     private final Long userId;
     private final String nickname;
     private final String userProfileImageUrl;
@@ -18,9 +19,10 @@ public class Comment {
     private final Integer depth;
 
     @Builder
-    public Comment(Long reviewCommentId, Long userId, String nickname, String userProfileImageUrl,
+    public Comment(Long reviewCommentId, Long reviewId, Long userId, String nickname, String userProfileImageUrl,
                    Long bundleId, String commentContent, Integer nestedCommentNum, String createdAt, Integer depth) {
         this.reviewCommentId = reviewCommentId;
+        this.reviewId = reviewId;
         this.userId = userId;
         this.nickname = nickname;
         this.userProfileImageUrl = userProfileImageUrl;

@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
 
 @Controller
@@ -103,9 +102,10 @@ public class ReviewController {
         }
     }
 
+    // NOTE: 부모 댓글 가져오기
     @GetMapping("/reviews/{reviewId}/comments")
     public BaseResponse<List<Comment>> getParentComments(@PathVariable("reviewId") Long reviewId,
-                                                   @RequestParam("page") Integer pageNum) {
+                                                         @RequestParam("page") Integer pageNum) {
         try {
             List<Comment> parentComments = reviewService.getParentComments(reviewId, pageNum);
             log.info("parentComments.size = " + parentComments.size() + ", getParentComments = " + parentComments.toString());
@@ -117,11 +117,32 @@ public class ReviewController {
         }
     }
 
-    @GetMapping("/comments/{commentId}/child-comments")
-    public BaseResponse<List<Comment>> getChildComments(@PathVariable("commentId") Long commentId,
+    // NOTE: 부모 댓글 쓰기
+    @PostMapping("/reviews/{reviewId}/comments")
+    public BaseResponse<Comment> postParentComment(@PathVariable("reviewId") Long reviewId,
+                                                   @RequestHeader("Access-Token") String accessToken,
+                                                   @RequestBody String content) {
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+        try {
+            long userId = jwtService.getUserId(accessToken);
+            Comment myParentComment = reviewService.postParentComment(reviewId, userId, content);
+            log.info("myParentComment = " + myParentComment.toString());
+            return new BaseResponse<>(myParentComment);
+        } catch (BaseException ex) {
+            ex.printStackTrace();
+            log.error("postParentReview): " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+    }
+
+    // NOTE: 자식 댓글 가져오기
+    @GetMapping("/comments/{bundleId}/child-comments")
+    public BaseResponse<List<Comment>> getChildComments(@PathVariable("bundleId") Long bundleId,
                                                         @RequestParam("page") Integer pageNum) {
         try {
-            List<Comment> childComments = reviewService.getChildComments(commentId, pageNum);
+            List<Comment> childComments = reviewService.getChildComments(bundleId, pageNum);
             log.info("childComments.size = " + childComments.size() + ", getChildComments = " + childComments.toString());
             return new BaseResponse<>(childComments);
         } catch (BaseException ex) {
@@ -131,6 +152,27 @@ public class ReviewController {
         }
     }
 
+    // NOTE: 자식 댓글 쓰기
+    @PostMapping("/reviews/{reviewId}/comments/{bundleId}/child-comments")
+    public BaseResponse<Comment> postChildComment(@PathVariable("reviewId") Long reviewId,
+                                                  @PathVariable("bundleId") Long bundleId,
+                                                  @RequestHeader("Access-Token") String accessToken,
+                                                  @RequestBody String content
+    ) {
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+        try {
+            long userId = jwtService.getUserId(accessToken);
+            Comment myChildComment = reviewService.postChildComment(reviewId, bundleId, userId, content);
+            log.info("myChildComment = " + myChildComment.toString());
+            return new BaseResponse<>(myChildComment);
+        } catch (BaseException ex) {
+            ex.printStackTrace();
+            log.error("((POST) /reviews): " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+    }
 
 }
 

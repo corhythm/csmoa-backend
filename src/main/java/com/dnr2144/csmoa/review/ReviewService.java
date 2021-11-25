@@ -83,10 +83,37 @@ public class ReviewService {
     }
 
     @Transactional
-    public List<Comment> getChildComments(Long commentId, Integer pageNum) throws BaseException {
-        if (commentId == null || pageNum == null || commentId < 1 || pageNum < 1) {
+    public Comment postParentComment(Long reviewId, Long userId, String content) throws BaseException {
+        if (reviewId == null || userId == null || content == null || reviewId < 1 || userId < 1 || content.isEmpty()) {
             throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
         }
-        return reviewRepository.getChildComments(commentId, pageNum);
+        if (userRepository.checkUserExists(userId) == 0) { // 존재하지 않는 유저일 때
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        return reviewRepository.postParentComment(userId, userId, content);
+    }
+
+
+    @Transactional
+    public List<Comment> getChildComments(Long bundleId, Integer pageNum) throws BaseException {
+        if (bundleId == null || pageNum == null || bundleId < 1 || pageNum < 1) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        return reviewRepository.getChildComments(bundleId, pageNum);
+    }
+
+    @Transactional
+    public Comment postChildComment(Long reviewId, Long bundleId, Long userId, String content) throws BaseException {
+        if (reviewId == null || bundleId == null || userId == null || content == null ||
+                reviewId < 1 || bundleId < 1 || userId < 1 || content.length() < 1) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        if (userRepository.checkUserExists(userId) == 0) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        if (reviewRepository.checkExistsParentCommentInThatReview(reviewId, bundleId) == 0) {
+            throw new BaseException(BaseResponseStatus.EMPTY_PARENT_COMMENT);
+        }
+        return reviewRepository.postChildComment(reviewId, bundleId, userId, content);
     }
 }
