@@ -15,10 +15,11 @@ public class Comment {
     private final String commentContent;
     private final Integer nestedCommentNum;
     private final String createdAt;
+    private final Integer depth;
 
     @Builder
     public Comment(Long reviewCommentId, Long userId, String nickname, String userProfileImageUrl,
-                   Long bundleId, String commentContent, Integer nestedCommentNum, String createdAt) {
+                   Long bundleId, String commentContent, Integer nestedCommentNum, String createdAt, Integer depth) {
         this.reviewCommentId = reviewCommentId;
         this.userId = userId;
         this.nickname = nickname;
@@ -27,5 +28,6 @@ public class Comment {
         this.commentContent = commentContent;
         this.nestedCommentNum = nestedCommentNum;
         this.createdAt = createdAt;
+        this.depth = depth;
     }
 }

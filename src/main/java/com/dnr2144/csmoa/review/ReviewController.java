@@ -104,15 +104,29 @@ public class ReviewController {
     }
 
     @GetMapping("/reviews/{reviewId}/comments")
-    public BaseResponse<List<Comment>> getComments(@PathVariable("reviewId") Long reviewId,
+    public BaseResponse<List<Comment>> getParentComments(@PathVariable("reviewId") Long reviewId,
                                                    @RequestParam("page") Integer pageNum) {
         try {
-            List<Comment> comments = reviewService.getComments(reviewId, pageNum);
-            log.info("comments = " + comments.toString());
-            return new BaseResponse<>(comments);
+            List<Comment> parentComments = reviewService.getParentComments(reviewId, pageNum);
+            log.info("parentComments.size = " + parentComments.size() + ", getParentComments = " + parentComments.toString());
+            return new BaseResponse<>(parentComments);
         } catch (BaseException ex) {
             ex.printStackTrace();
             log.error("((GET) /getComments): " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+    }
+
+    @GetMapping("/comments/{commentId}/child-comments")
+    public BaseResponse<List<Comment>> getChildComments(@PathVariable("commentId") Long commentId,
+                                                        @RequestParam("page") Integer pageNum) {
+        try {
+            List<Comment> childComments = reviewService.getChildComments(commentId, pageNum);
+            log.info("childComments.size = " + childComments.size() + ", getChildComments = " + childComments.toString());
+            return new BaseResponse<>(childComments);
+        } catch (BaseException ex) {
+            ex.printStackTrace();
+            log.error("((GET) /getChildComments): " + ex.getStatus().toString());
             return new BaseResponse<>(ex.getStatus());
         }
     }

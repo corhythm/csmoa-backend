@@ -188,9 +188,9 @@ public class ReviewRepository {
         }
     }
 
-    public List<Comment> getComments(long reviewId, int pageNum) throws BaseException {
+    public List<Comment> getParentComments(long reviewId, int pageNum) throws BaseException {
         try {
-            return jdbcTemplate.query(ReviewSqlQuery.GET_COMMENTS, (rs, row) -> Comment.builder()
+            return jdbcTemplate.query(ReviewSqlQuery.GET_PARENT_COMMENTS, (rs, row) -> Comment.builder()
                     .reviewCommentId(rs.getLong("review_comment_id"))
                     .userId(rs.getLong("user_id"))
                     .nickname(rs.getString("nickname"))
@@ -199,6 +199,7 @@ public class ReviewRepository {
                     .commentContent(rs.getString("comment_content"))
                     .nestedCommentNum(rs.getInt("nested_comment_num"))
                     .createdAt(rs.getString("created_at"))
+                    .depth(rs.getInt("depth"))
                     .build(), reviewId, (pageNum - 1) * 5);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -207,5 +208,24 @@ public class ReviewRepository {
         }
     }
 
+    // 해당 commentId는 parent이므로 이걸 bundleId로 사용하면 됨
+    public List<Comment> getChildComments(long commentId, int pageNum) throws BaseException{
+        try {
+            return jdbcTemplate.query(ReviewSqlQuery.GET_CHILD_COMMENTS, (rs, row) -> Comment.builder()
+                    .reviewCommentId(rs.getLong("review_comment_id"))
+                    .userId(rs.getLong("user_id"))
+                    .nickname(rs.getString("nickname"))
+                    .userProfileImageUrl(rs.getString("profile_image_url"))
+                    .bundleId(rs.getLong("bundle_id"))
+                    .commentContent(rs.getString("comment_content"))
+                    .createdAt(rs.getString("created_at"))
+                    .depth(rs.getInt("depth"))
+                    .build(), commentId, (pageNum - 1) * 5);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.info("In ReviewRepository, getNestedComments" + ex.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
 
 }

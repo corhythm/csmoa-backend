@@ -75,10 +75,18 @@ public class ReviewService {
     }
 
     @Transactional
-    public List<Comment> getComments(Long reviewId, Integer pageNum) throws BaseException {
+    public List<Comment> getParentComments(Long reviewId, Integer pageNum) throws BaseException {
         if (reviewId == null || pageNum == null || reviewId < 1 || pageNum < 1) {
             throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
         }
-        return reviewRepository.getComments(reviewId, pageNum);
+        return reviewRepository.getParentComments(reviewId, pageNum);
+    }
+
+    @Transactional
+    public List<Comment> getChildComments(Long commentId, Integer pageNum) throws BaseException {
+        if (commentId == null || pageNum == null || commentId < 1 || pageNum < 1) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        return reviewRepository.getChildComments(commentId, pageNum);
     }
 }
