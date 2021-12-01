@@ -31,8 +31,10 @@ public enum BaseResponseStatus {
     // 220번 대: 행사 상품 오류
     INVALID_EVENT_ITEM_ERROR(false, 220, "존재하지 않는 행사상품입니다."),
 
+
     // 230번 대: 리뷰 에러
-    EMPTY_PARENT_COMMENT(false, 220, "대댓글을 달고자 하는 해당 리뷰에 부모 댓글이 존재하지 않습니다."),
+    INVALID_REVIEW_ERROR(false, 230, "존재하지 않는 리뷰입니다"),
+    EMPTY_PARENT_COMMENT(false, 231, "대댓글을 달고자 하는 해당 리뷰에 부모 댓글이 존재하지 않습니다."),
     /**
      * 400 : Database, Server 오류
      */

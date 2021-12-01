@@ -3,12 +3,14 @@ package com.dnr2144.csmoa.review;
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.login.UserRepository;
+import com.dnr2144.csmoa.review.domain.PostReviewLikeRes;
 import com.dnr2144.csmoa.review.domain.PostReviewReq;
 import com.dnr2144.csmoa.review.domain.PostReviewRes;
 import com.dnr2144.csmoa.review.domain.model.Comment;
 import com.dnr2144.csmoa.review.domain.model.DetailedReview;
 import com.dnr2144.csmoa.review.domain.model.Review;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
@@ -90,10 +93,11 @@ public class ReviewService {
         if (userRepository.checkUserExists(userId) == 0) { // 존재하지 않는 유저일 때
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
         }
-        return reviewRepository.postParentComment(userId, userId, content);
+        return reviewRepository.postParentComment(reviewId, userId, content);
     }
 
 
+    // NOTE: 자식 댓글 가져오기
     @Transactional
     public List<Comment> getChildComments(Long bundleId, Integer pageNum) throws BaseException {
         if (bundleId == null || pageNum == null || bundleId < 1 || pageNum < 1) {
@@ -102,6 +106,7 @@ public class ReviewService {
         return reviewRepository.getChildComments(bundleId, pageNum);
     }
 
+    // NOTE: 자식 댓글 쓰기
     @Transactional
     public Comment postChildComment(Long reviewId, Long bundleId, Long userId, String content) throws BaseException {
         if (reviewId == null || bundleId == null || userId == null || content == null ||
@@ -115,5 +120,21 @@ public class ReviewService {
             throw new BaseException(BaseResponseStatus.EMPTY_PARENT_COMMENT);
         }
         return reviewRepository.postChildComment(reviewId, bundleId, userId, content);
+    }
+
+    // NOTE: 리뷰 좋아요 <-> 좋아요 취소
+    @Transactional
+    public PostReviewLikeRes postReviewLike(Long reviewId, Long userId) throws BaseException {
+        log.info("in reviewService, postReviewLike / reviewId = " + reviewId + ", userId = " + userId);
+        if (reviewId == null || userId == null || reviewId < 1 || userId < 1) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        if (userRepository.checkUserExists(userId) == 0) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        if (reviewRepository.checkReviewExists(reviewId) == 0) {
+            throw new BaseException(BaseResponseStatus.INVALID_REVIEW_ERROR);
+        }
+        return reviewRepository.postReviewLike(reviewId, userId);
     }
 }

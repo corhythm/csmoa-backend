@@ -30,7 +30,7 @@ public class EventItemRepository {
     }
 
 
-    // 추천 행사 상품 받아오기
+    // NOTE: 추천 행사 상품 받아오기
     public List<EventItem> getRecommendedEventItems(long userId, List<String> csBrands,
                                                     List<String> eventTypes, List<String> categories) throws BaseException {
         try {
@@ -64,7 +64,7 @@ public class EventItemRepository {
         }
     }
 
-    // 일반 행사 상품 받아오기
+    // NOTE: 일반 행사 상품 받아오기
     public List<EventItem> getEventItems(long userId, int pageNum, List<String> csBrands,
                                          List<String> eventTypes, List<String> categories) throws BaseException {
 
@@ -100,7 +100,7 @@ public class EventItemRepository {
         }
     }
 
-    // 세부화면 하단에 추천 상품 가져오기
+    // NOTE: 세부화면 하단에 추천 상품 가져오기
     public GetDetailEventItemRes getDetailRecommendedEventItem(long userId, long eventItemId) throws BaseException {
         try {
 
@@ -150,7 +150,7 @@ public class EventItemRepository {
         }
     }
 
-    // 조회수 post
+    // NOTE: 조회수 post
     public boolean postEventItemHistory(long userId, long eventItemId) throws BaseException {
         try {
             String postEventItemHistoryQuery = "INSERT INTO event_item_histories (user_id, event_item_id) VALUE (?, ?);";
@@ -162,7 +162,7 @@ public class EventItemRepository {
         }
     }
 
-    // 좋아요 post
+    // NOTE: 좋아요 post
     public PostEventItemLikeRes postEventItemLike(long userId, long eventItemId) throws BaseException {
         // 이건 좋아요 이력이 있는지 확인하고 없으면 insert 있으면, update해야 함
         try {
@@ -197,11 +197,11 @@ public class EventItemRepository {
         }
     }
 
-    // 행사 상품 있는지 조회
+    // NOTE: 행사 상품 있는지 조회
     public Integer checkEventItemExists(long eventItemId) throws BaseException {
         try {
             String checkEventItemExistsQuery = "SELECT EXISTS(SELECT * FROM event_items WHERE event_item_id = ?);";
-            ;
+
             return jdbcTemplate.queryForObject(checkEventItemExistsQuery, Integer.class, eventItemId);
         } catch (Exception exception) {
             log.error("checkUserExists / " + exception.getMessage());
@@ -209,11 +209,14 @@ public class EventItemRepository {
         }
     }
 
-    // 행사 상품 좋아요 한 이력이 있는지, 있다면 가져오기
+    // NOTE: 행사 상품 좋아요 한 이력이 있는지, 있다면 가져오기
     public Boolean getEventItemLike(long userId, long eventItemId) throws BaseException {
         try {
+            String checkEventItemLikeExistsQuery = "SELECT EXISTS(SELECT is_like FROM event_item_likes WHERE user_id = ? AND event_item_id = ?)";
+            int isEventItemLikeExists = jdbcTemplate.queryForObject(checkEventItemLikeExistsQuery, Integer.class, userId, eventItemId);
+            if (isEventItemLikeExists == 0) return null;
+
             String getEventItemLikeQuery = "SELECT is_like FROM event_item_likes WHERE user_id = ? AND event_item_id = ?;";
-            ;
             return jdbcTemplate.queryForObject(getEventItemLikeQuery, Boolean.class, userId, eventItemId);
         } catch (Exception exception) {
             log.error("checkEventItemLikeExists / " + exception.getMessage());

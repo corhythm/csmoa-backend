@@ -2,8 +2,10 @@ package com.dnr2144.csmoa.review;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
+import com.dnr2144.csmoa.event_items.domain.PostEventItemLikeRes;
 import com.dnr2144.csmoa.firebase.FirebaseStorageManager;
 import com.dnr2144.csmoa.login.domain.GetUserInfoRes;
+import com.dnr2144.csmoa.review.domain.PostReviewLikeRes;
 import com.dnr2144.csmoa.review.domain.PostReviewReq;
 import com.dnr2144.csmoa.review.domain.PostReviewRes;
 import com.dnr2144.csmoa.review.domain.model.Comment;
@@ -224,7 +226,7 @@ public class ReviewRepository {
                 preparedStatement.setLong(1, userId);
                 preparedStatement.setLong(2, reviewId);
                 preparedStatement.setLong(3, -1);
-                preparedStatement.setInt(4, 0);
+                preparedStatement.setInt(4, 1);
                 preparedStatement.setString(5, content);
 
                 return preparedStatement;
@@ -256,7 +258,7 @@ public class ReviewRepository {
     }
 
     // NOTE: 해당 commentId는 parent이므로 이걸 bundleId로 사용하면 됨
-    public List<Comment> getChildComments(long bundleId, int pageNum) throws BaseException{
+    public List<Comment> getChildComments(long bundleId, int pageNum) throws BaseException {
         try {
             return jdbcTemplate.query(ReviewSqlQuery.GET_CHILD_COMMENTS, (rs, row) -> Comment.builder()
                     .reviewCommentId(rs.getLong("review_comment_id"))
@@ -276,6 +278,7 @@ public class ReviewRepository {
         }
     }
 
+    // NOTE: 리뷰 자식 댓글 삽입
     public Comment postChildComment(long reviewId, long bundleId, long userId, String content) throws BaseException {
         try {
             String insertChildCommentQuery = "INSERT INTO review_comments " +
@@ -316,8 +319,41 @@ public class ReviewRepository {
         }
     }
 
+    // NOTE: 리뷰 좋아요 OR 좋아요 취소
+    public PostReviewLikeRes postReviewLike(long reviewId, long userId) throws BaseException {
+        try {
+            log.info("in Repository postReviewLike / reviewId = " + reviewId + ", userId = " +userId);
+            Boolean isLike = getReviewLike(reviewId, userId);
+            if (isLike == null) {
+                String insertEventItemLikeQuery = "INSERT INTO review_likes (review_id, user_id, is_like) VALUE (?, ?, ?);";
+                jdbcTemplate.update(insertEventItemLikeQuery, reviewId, userId, true);
+                isLike = true;
+            } else {
+                // 좋아요 <-> 싫어요
+                String updateReviewLikeQuery = "";
+                if (Boolean.TRUE.equals(isLike)) {  // 좋아요 -> 싫어요
+                    updateReviewLikeQuery = "UPDATE review_likes SET is_like = false, updated_at = CURRENT_TIMESTAMP WHERE review_id = ? AND user_id = ?;";
+                } else {  // 싫어요 -> 좋아요
+                    updateReviewLikeQuery = "UPDATE review_likes SET is_like = true, updated_at = CURRENT_TIMESTAMP WHERE review_id = ? AND user_id = ?;";
+                }
+                isLike = !isLike;
+                jdbcTemplate.update(updateReviewLikeQuery, reviewId, userId);
+            }
+
+            return PostReviewLikeRes.builder()
+                    .userId(userId)
+                    .reviewId(reviewId)
+                    .isLike(isLike)
+                    .build();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.info("In ReviewRepository, postReviewLike = " + ex.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
     // NOTE: 해당 리뷰에 해당 bundleId를 가진 부모 댓글이 있는지 체크
-    public Integer checkExistsParentCommentInThatReview(long reviewId, long bundleId) throws BaseException{
+    public Integer checkExistsParentCommentInThatReview(long reviewId, long bundleId) throws BaseException {
         try {
             String query = "SELECT EXISTS(SELECT * FROM review_comments WHERE review_id = ? AND bundle_id = ? AND depth = 1)";
             return jdbcTemplate.queryForObject(query, Integer.class, reviewId, bundleId);
@@ -327,5 +363,35 @@ public class ReviewRepository {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
+
+    // NOTE: 리뷰 있는지 조회
+    public Integer checkReviewExists(long reviewId) throws BaseException {
+        try {
+            String checkReviewExistsQuery = "SELECT EXISTS(SELECT * FROM reviews WHERE review_id = ?)";
+            return jdbcTemplate.queryForObject(checkReviewExistsQuery, Integer.class, reviewId);
+        } catch (Exception exception) {
+            log.error("checkReviewExists / " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // NOTE: 리뷰 좋아요 한 이력이 있는지 알아보기
+    public Boolean getReviewLike(long reviewId, long userId) throws BaseException {
+        try {
+            String checkExistsReviewLikeQuery = "SELECT EXISTS(SELECT is_like FROM review_likes WHERE review_id = ? and user_id = ?)";
+            int isReviewLikeExists = jdbcTemplate.queryForObject(checkExistsReviewLikeQuery, Integer.class, reviewId, userId);
+            if (isReviewLikeExists == 0) return null;
+
+            // 이전 기록이 있으면
+            String getReviewLikeQuery = "SELECT is_like FROM review_likes WHERE review_id = ? and user_id = ?";
+            return jdbcTemplate.queryForObject(getReviewLikeQuery, Boolean.class, reviewId, userId);
+        } catch (Exception exception) {
+            log.error("getReviewLike =  / " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+
+
 
 }

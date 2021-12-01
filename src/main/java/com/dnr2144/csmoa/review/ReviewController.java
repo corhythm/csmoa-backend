@@ -3,6 +3,7 @@ package com.dnr2144.csmoa.review;
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponse;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
+import com.dnr2144.csmoa.review.domain.PostReviewLikeRes;
 import com.dnr2144.csmoa.review.domain.PostReviewReq;
 import com.dnr2144.csmoa.review.domain.PostReviewRes;
 import com.dnr2144.csmoa.review.domain.model.Comment;
@@ -169,7 +170,27 @@ public class ReviewController {
             return new BaseResponse<>(myChildComment);
         } catch (BaseException ex) {
             ex.printStackTrace();
-            log.error("((POST) /reviews): " + ex.getStatus().toString());
+            log.error("postChildComment): " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+    }
+
+//    // NOTE: 리뷰 좋아요 / 좋아요 취소
+    @PostMapping("/reviews/{reviewId}/like")
+    public BaseResponse<PostReviewLikeRes> postReviewLike(@PathVariable("reviewId") Long reviewId,
+                                                  @RequestHeader("Access-Token") String accessToken) {
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+        try {
+            long userId = jwtService.getUserId(accessToken);
+            log.info("reviewId = " + reviewId + ", userId = " + userId);
+            PostReviewLikeRes postReviewLikeRes = reviewService.postReviewLike(reviewId, userId);
+            log.info("postReviewLikeRes = " + postReviewLikeRes.toString());
+            return new BaseResponse<>(postReviewLikeRes);
+        } catch (BaseException ex) {
+            ex.printStackTrace();
+            log.error("postReviewLike: " + ex.getStatus().toString());
             return new BaseResponse<>(ex.getStatus());
         }
     }
