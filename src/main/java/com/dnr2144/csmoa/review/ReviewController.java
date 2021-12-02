@@ -26,6 +26,7 @@ public class ReviewController {
     private final JwtService jwtService;
     private final ReviewService reviewService;
 
+    // NOTE: 리뷰 쓰기
     @PostMapping("/reviews")
     public BaseResponse<PostReviewRes> postReview(@RequestHeader("Access-Token") String accessToken,
                                                   PostReviewReq postReviewReq) {

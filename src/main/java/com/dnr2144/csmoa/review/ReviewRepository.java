@@ -40,6 +40,7 @@ public class ReviewRepository {
         this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
     }
 
+    // NOTE: 리뷰 등록
     public PostReviewRes postReview(long userId, PostReviewReq postReviewReq) throws BaseException {
         try {
             KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -88,6 +89,7 @@ public class ReviewRepository {
         }
     }
 
+    // NOTE: 베스트 리뷰 가져오기
     public List<Review> getBestReviews(long userId) throws BaseException {
         try {
             return jdbcTemplate.query(ReviewSqlQuery.GET_BEST_REVIEWS,
@@ -113,6 +115,7 @@ public class ReviewRepository {
         }
     }
 
+    // NOTE: 일반 리뷰 가져오기
     public List<Review> getReviews(long userId, int pageNum) throws BaseException {
         try {
             return jdbcTemplate.query(ReviewSqlQuery.GET_REVIEWS,
@@ -138,6 +141,7 @@ public class ReviewRepository {
         }
     }
 
+    // NOTE: 리뷰 세부정보 가져오기
     public DetailedReview getDetailedReview(long reviewId, long userId) throws BaseException {
         try {
             Map<String, Object> params = new HashMap();
@@ -191,6 +195,7 @@ public class ReviewRepository {
         }
     }
 
+    // NOTE: 부모 댓글 가져오기
     public List<Comment> getParentComments(long reviewId, int pageNum) throws BaseException {
         try {
             return jdbcTemplate.query(ReviewSqlQuery.GET_PARENT_COMMENTS, (rs, row) -> Comment.builder()
@@ -390,8 +395,5 @@ public class ReviewRepository {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
-
-
-
 
 }

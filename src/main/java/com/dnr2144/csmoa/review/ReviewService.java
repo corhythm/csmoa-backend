@@ -24,6 +24,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
 
+    // NOTE: 리뷰 등록
     @Transactional
     public PostReviewRes postReview(long userId, PostReviewReq postReviewReq) throws BaseException {
 
@@ -42,6 +43,7 @@ public class ReviewService {
         return reviewRepository.postReview(userId, postReviewReq);
     }
 
+    // NOTE: 베스트 리뷰 가져오기
     @Transactional
     public List<Review> getBestReviews(Long userId) throws BaseException {
         if (userId == null) { // 입력값 null 체크
@@ -55,6 +57,7 @@ public class ReviewService {
         return reviewRepository.getBestReviews(userId);
     }
 
+    // NOTE: 일반 리뷰 가져오기
     @Transactional
     public List<Review> getReviews(Long userId, Integer pageNum) throws BaseException {
         if (userId == null || pageNum == null || pageNum < 1) { // 입력값 null 체크
@@ -66,6 +69,7 @@ public class ReviewService {
         return reviewRepository.getReviews(userId, pageNum);
     }
 
+    // NOTE: 리뷰 세부 정보 가져오기
     @Transactional
     public DetailedReview getDetailedReview(Long reviewId, Long userId) throws BaseException {
         if (reviewId == null || userId == null || reviewId < 1 || userId < 1) {
@@ -77,6 +81,7 @@ public class ReviewService {
         return reviewRepository.getDetailedReview(reviewId, userId);
     }
 
+    // NOTE: 부모 댓글 가져오기
     @Transactional
     public List<Comment> getParentComments(Long reviewId, Integer pageNum) throws BaseException {
         if (reviewId == null || pageNum == null || reviewId < 1 || pageNum < 1) {
@@ -85,6 +90,7 @@ public class ReviewService {
         return reviewRepository.getParentComments(reviewId, pageNum);
     }
 
+    // NOTE: 부모 댓글 등록
     @Transactional
     public Comment postParentComment(Long reviewId, Long userId, String content) throws BaseException {
         if (reviewId == null || userId == null || content == null || reviewId < 1 || userId < 1 || content.isEmpty()) {

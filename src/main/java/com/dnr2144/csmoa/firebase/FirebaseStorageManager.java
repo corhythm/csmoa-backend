@@ -22,8 +22,6 @@ import java.util.UUID;
 public class FirebaseStorageManager {
 
     private final String BUCKET_NAME = "csmoa-38f5b.appspot.com";
-    private final String RECIPE = "recipe";
-    private final String REVIEW = "review";
 
     @PostConstruct // Bean이 SpringApplicationContext에 등록될 때 실행
     private void init() {
@@ -45,6 +43,7 @@ public class FirebaseStorageManager {
         }
     }
 
+    // NOTE: 프로필 데이터 저장
     // 데이터는 소중하니 delete는 굳이 만들지 말자.
     public String saveProfileImage(Long userId, MultipartFile multipartFile) throws IOException {
         Bucket bucket = StorageClient.getInstance().bucket();
@@ -67,6 +66,7 @@ public class FirebaseStorageManager {
         return absoluteFilePathUrl;
     }
 
+    // NOTE: 리뷰 사진 저장
     public List<String> saveReviewImages(long userId, List<MultipartFile> reviewImages) throws IOException {
         Bucket bucket = StorageClient.getInstance().bucket();
         List<String> reviewImageUrls = new ArrayList();
@@ -83,5 +83,24 @@ public class FirebaseStorageManager {
         }
 
         return reviewImageUrls;
+    }
+
+    // NOTE: 레시피 사진 저장
+    public List<String> saveRecipeImages(long userId, List<MultipartFile> recipeImages) throws IOException {
+        Bucket bucket = StorageClient.getInstance().bucket();
+        List<String> recipeImageUrls = new ArrayList();
+
+        for (MultipartFile recipeImage : recipeImages) {
+            String fileName = userId + "_" + UUID.randomUUID();
+            String recipe = "recipe";
+            String filePath = recipe + "/" + fileName;
+            // save
+            bucket.create(filePath, recipeImage.getBytes(), recipeImage.getContentType());
+            String absoluteFilePathUrl = String.format("https://firebasestorage.googleapis.com/v0/b/%s/o/%s%%2F%s?alt=media",
+                    BUCKET_NAME, recipe, fileName);
+            recipeImageUrls.add(absoluteFilePathUrl);
+        }
+
+        return recipeImageUrls;
     }
 }
