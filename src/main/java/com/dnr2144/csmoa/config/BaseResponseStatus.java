@@ -35,6 +35,10 @@ public enum BaseResponseStatus {
     // 230번 대: 리뷰 에러
     INVALID_REVIEW_ERROR(false, 230, "존재하지 않는 리뷰입니다"),
     EMPTY_PARENT_COMMENT(false, 231, "대댓글을 달고자 하는 해당 리뷰에 부모 댓글이 존재하지 않습니다."),
+
+    // 240번 대: 레시피 에러
+    INVALID_RECIPE_ERROR(false, 240, "존재하지 않는 레시피입니다"),
+
     /**
      * 400 : Database, Server 오류
      */

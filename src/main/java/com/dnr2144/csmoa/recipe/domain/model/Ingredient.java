@@ -10,11 +10,11 @@ import lombok.ToString;
 @Getter
 public class Ingredient {
     private String name;
-    private Integer price;
+    private String price;
     private String csBrand;
 
     @Builder
-    public Ingredient(String name, Integer price, String csBrand) {
+    public Ingredient(String name, String price, String csBrand) {
         this.name = name;
         this.price = price;
         this.csBrand = csBrand;

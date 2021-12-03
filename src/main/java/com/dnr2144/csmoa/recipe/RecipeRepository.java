@@ -5,7 +5,11 @@ import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.firebase.FirebaseStorageManager;
 import com.dnr2144.csmoa.recipe.domain.PostRecipeReq;
 import com.dnr2144.csmoa.recipe.domain.PostRecipeRes;
+import com.dnr2144.csmoa.recipe.domain.model.DetailedRecipe;
 import com.dnr2144.csmoa.recipe.domain.model.Ingredient;
+import com.dnr2144.csmoa.recipe.domain.model.Recipe;
+import com.dnr2144.csmoa.review.ReviewSqlQuery;
+import com.dnr2144.csmoa.review.domain.model.Review;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +26,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @Repository
 @Slf4j
@@ -83,7 +84,7 @@ public class RecipeRepository {
             Map<String, Object> recipeIngredientParams = new HashMap<>();
             recipeIngredientParams.put("recipeId", recipeId);
             List<Ingredient> ingredients = postRecipeReq.getIngredients();
-            for(Ingredient ingredient : ingredients) {
+            for (Ingredient ingredient : ingredients) {
                 //:ingredientName, :ingredientPrice, :csBrand
                 recipeIngredientParams.put("ingredientName", ingredient.getName());
                 recipeIngredientParams.put("ingredientPrice", ingredient.getPrice());
@@ -103,6 +104,103 @@ public class RecipeRepository {
             exception.printStackTrace();
             log.info("(in ReviewRepository, postReview) " + exception.getMessage());
             transactionManager.rollback(transactionStatus);
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // NOTE: 추천 레시피 리스트 받아오기)
+    public List<Recipe> getRecommendedRecipes(long userId) throws BaseException {
+        try {
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("randomOffset", new Random().nextInt(40));
+
+            return namedParameterJdbcTemplate.query(RecipeSqlQuery.GET_RECOMMENDED_RECIPES, params,
+                    (rs, row) -> Recipe.builder()
+                            .recipeId(rs.getLong("recipe_id"))
+                            .recipeName(rs.getString("recipe_title"))
+                            .recipeContent(rs.getString("recipe_content"))
+                            .ingredients(rs.getString("ingredients"))
+                            .likeNum(rs.getInt("like_num"))
+                            .viewNum(rs.getInt("view_num"))
+                            .isLike(rs.getBoolean("is_like"))
+                            .recipeMainImageUrl(rs.getString("image_src"))
+                            .build());
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            log.info("(in RecipeRepository, getRecommendedRecipes) " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // NOTE: 일반 레시피 리스트 받아오기)
+    public List<Recipe> getRecipes(long userId, int pageNum) throws BaseException {
+        try {
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("pageNum", (pageNum - 1) * 10);
+
+            return namedParameterJdbcTemplate.query(RecipeSqlQuery.GET_RECIPES, params,
+                    (rs, row) -> Recipe.builder()
+                            .recipeId(rs.getLong("recipe_id"))
+                            .recipeName(rs.getString("recipe_title"))
+                            .recipeContent(rs.getString("recipe_content"))
+                            .ingredients(rs.getString("ingredients"))
+                            .likeNum(rs.getInt("like_num"))
+                            .viewNum(rs.getInt("view_num"))
+                            .isLike(rs.getBoolean("is_like"))
+                            .recipeMainImageUrl(rs.getString("image_src"))
+                            .build());
+
+        } catch (Exception exception) {
+            exception.printStackTrace();
+            log.info("(in RecipeRepository, getRecommendedRecipes) " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    public DetailedRecipe getDetailedRecipe(long userId, long recipeId) throws BaseException {
+        try {
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("recipeId", recipeId);
+
+            // 재료 리스트 가져오기
+            List<Ingredient> ingredients = jdbcTemplate.query(RecipeSqlQuery.GET_DETAILED_RECIPE_INGREDIENTS,
+                    (rs, row) -> Ingredient.builder()
+                            .name(rs.getString("ingredient_name"))
+                            .price(rs.getString("ingredient_price"))
+                            .build(), recipeId);
+
+            return namedParameterJdbcTemplate.queryForObject(RecipeSqlQuery.GET_DETAILED_RECIPE, params,
+                    (rs, row) -> DetailedRecipe
+                            .builder()
+                            .recipeId(rs.getLong("recipe_id"))
+                            .userId(rs.getLong("user_id"))
+                            .userNickname(rs.getString("nickname"))
+                            .userProfileImageUrl(rs.getString("profile_image_url"))
+                            .recipeName(rs.getString("recipe_title"))
+                            .ingredients(ingredients)
+                            .recipeContent(rs.getString("recipe_content"))
+                            .viewNum(rs.getInt("view_num"))
+                            .likeNum(rs.getInt("like_num"))
+                            .isLike(rs.getBoolean("is_like"))
+                            .createdAt(rs.getString("created_at"))
+                            .build());
+
+        } catch (Exception exception) {
+            log.error("getDetailedRecipe / " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    public Integer checkRecipeExists(long recipeId) throws BaseException {
+        try {
+            String checkRecipeExistsQuery = "SELECT EXISTS(SELECT * FROM recipes WHERE recipe_id = ?)";
+            return jdbcTemplate.queryForObject(checkRecipeExistsQuery, Integer.class, recipeId);
+        } catch (Exception exception) {
+            log.error("checkRecipeExists / " + exception.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
