@@ -25,7 +25,7 @@ class RecipeControllerTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void Get에서는_setter가_없어도된다() throws Exception {
+    void Get에서는_setter가_없어도된다() throws Exception {
         String content = objectMapper.writeValueAsString(PostRecipeLikeRes.builder().recipeId(1L).userId(4L).isLike(false).build());
 
         mvc.perform(post("/recipes/1/like")
@@ -36,4 +36,5 @@ class RecipeControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(content));
     }
+
 }

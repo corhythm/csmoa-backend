@@ -59,14 +59,14 @@ public class ReviewService {
 
     // NOTE: 일반 리뷰 가져오기
     @Transactional
-    public List<Review> getReviews(Long userId, Integer pageNum) throws BaseException {
-        if (userId == null || pageNum == null || pageNum < 1) { // 입력값 null 체크
+    public List<Review> getReviews(Long userId, String searchWord, Integer pageNum) throws BaseException {
+        if (userId == null || pageNum == null || userId < 1 || pageNum < 1) { // 입력값 null 체크
             throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
         }
         if (userRepository.checkUserExists(userId) == 0) { // 존재하지 않는 유저일 때
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
         }
-        return reviewRepository.getReviews(userId, pageNum);
+        return reviewRepository.getReviews(userId, searchWord, pageNum);
     }
 
     // NOTE: 리뷰 세부 정보 가져오기
@@ -131,7 +131,6 @@ public class ReviewService {
     // NOTE: 리뷰 좋아요 <-> 좋아요 취소
     @Transactional
     public PostReviewLikeRes postReviewLike(Long reviewId, Long userId) throws BaseException {
-        log.info("in reviewService, postReviewLike / reviewId = " + reviewId + ", userId = " + userId);
         if (reviewId == null || userId == null || reviewId < 1 || userId < 1) {
             throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
         }

@@ -70,15 +70,16 @@ public class ReviewController {
     // NOTE: 일반 리뷰 가져오기
     @GetMapping("/reviews")
     public BaseResponse<List<Review>> getReviews(@RequestHeader("Access-Token") String accessToken,
-                                                 @RequestParam Integer page) {
+                                                 @RequestParam(required = false, value = "search") String searchWord,
+                                                 @RequestParam("page") Integer pageNum) {
         if (accessToken == null) {
             return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
         }
         try {
             long userId = jwtService.getUserId(accessToken);
-            log.info("/reviews / userId = " + userId + ", page = " + page);
-            List<Review> reviews = reviewService.getReviews(userId, page);
-//            log.info("getReviewRes = " + getReviewsRes.toString());
+            log.info("/reviews / userId = " + userId + ", pageNum = " + pageNum);
+            List<Review> reviews = reviewService.getReviews(userId, searchWord, pageNum);
+            log.info("reviews = " + reviews);
             return new BaseResponse<>(reviews);
         } catch (BaseException ex) {
             ex.printStackTrace();
@@ -182,7 +183,7 @@ public class ReviewController {
     // NOTE: 리뷰 좋아요 / 좋아요 취소
     @PostMapping("/reviews/{reviewId}/like")
     public BaseResponse<PostReviewLikeRes> postReviewLike(@PathVariable("reviewId") Long reviewId,
-                                                  @RequestHeader("Access-Token") String accessToken) {
+                                                          @RequestHeader("Access-Token") String accessToken) {
         if (accessToken == null) {
             return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
         }
@@ -198,7 +199,6 @@ public class ReviewController {
             return new BaseResponse<>(ex.getStatus());
         }
     }
-
 }
 
 

@@ -95,16 +95,18 @@ public class ReviewRepository {
                     (rs, row) -> Review.builder()
                             .reviewId(rs.getLong("review_id"))
                             .userId(rs.getLong("user_id"))
-                            .itemName(rs.getString("item_name"))
-                            .itemPrice(rs.getString("item_price"))
-                            .itemStarScore(rs.getFloat("item_star_score"))
+                            .reviewName(rs.getString("item_name"))
+                            .price(rs.getString("item_price"))
+                            .starScore(rs.getFloat("item_star_score"))
                             .csBrand(rs.getString("cs_brand"))
                             .content(rs.getString("content"))
                             .createdAt(rs.getString("created_at"))
                             .likeNum(rs.getInt("like_num"))
                             .viewNum(rs.getInt("view_num"))
                             .commentNum(rs.getInt("comment_num"))
-                            .itemImageUrl(rs.getString("image_src"))
+                            .reviewImageUrls(Arrays.asList(
+                                    rs.getString("review_image_urls").split(",", -1))
+                            )
                             .isLike(rs.getBoolean("is_like"))
                             .build(), userId, new Random().nextInt(30));
         } catch (Exception exception) {
@@ -115,27 +117,76 @@ public class ReviewRepository {
     }
 
     // NOTE: 일반 리뷰 가져오기
-    public List<Review> getReviews(long userId, int pageNum) throws BaseException {
+    public List<Review> getReviews(long userId, String searchWord, int pageNum) throws BaseException {
         try {
-            return jdbcTemplate.query(ReviewSqlQuery.GET_REVIEWS,
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("pageNum", (pageNum - 1) * 10);
+            String query = null;
+
+            if (searchWord == null) { // 일반 리뷰
+                log.info("(in ReviewRepository) 일반 리뷰");
+                query = ReviewSqlQuery.GET_REVIEWS;
+
+            } else { // 검색된 리뷰
+                params.put("searchWord", "%" + searchWord + "%");
+                log.info("(in ReviewRepository) 리뷰 검색");
+                query = ReviewSqlQuery.GET_REVIEW_SEARCH_RESULTS;
+            }
+
+            return namedParameterJdbcTemplate.query(query, params,
                     (rs, row) -> Review.builder()
                             .reviewId(rs.getLong("review_id"))
                             .userId(rs.getLong("user_id"))
-                            .itemName(rs.getString("item_name"))
-                            .itemPrice(rs.getString("item_price"))
-                            .itemStarScore(rs.getFloat("item_star_score"))
+                            .reviewName(rs.getString("item_name"))
+                            .price(rs.getString("item_price"))
+                            .starScore(rs.getFloat("item_star_score"))
                             .csBrand(rs.getString("cs_brand"))
                             .content(rs.getString("content"))
                             .createdAt(rs.getString("created_at"))
                             .likeNum(rs.getInt("like_num"))
                             .viewNum(rs.getInt("view_num"))
                             .commentNum(rs.getInt("comment_num"))
-                            .itemImageUrl(rs.getString("image_src"))
+                            .reviewImageUrls(Arrays.asList(
+                                    rs.getString("review_image_urls").split(",", -1))
+                            )
                             .isLike(rs.getBoolean("is_like"))
-                            .build(), userId, (pageNum - 1) * 5);
+                            .build());
+
         } catch (Exception exception) {
             exception.printStackTrace();
             log.info("(in ReviewRepository, getReviews) " + exception.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
+    // NOTE: 리뷰 검색 결과 가져오기
+    public List<Review> getReviewSearchResult(long userId, String searchWord, int pageNum) throws BaseException {
+        try {
+            log.info("리뷰리포지토리 / userId = " + userId + ", searchWord = " + searchWord + ", pageNum = " + pageNum);
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("searchWord", "%" + searchWord + "%");
+            params.put("pageNum", (pageNum - 1) * 10);
+
+            return namedParameterJdbcTemplate.query(ReviewSqlQuery.GET_REVIEW_SEARCH_RESULTS, params,
+                    (rs, row) -> Review.builder()
+                            .reviewId(rs.getLong("review_id"))
+                            .reviewName(rs.getString("item_name"))
+                            .price(rs.getString("item_price"))
+                            .starScore(rs.getFloat("item_star_score"))
+                            .csBrand(rs.getString("cs_brand"))
+                            .commentNum(rs.getInt("comment_num"))
+                            .viewNum(rs.getInt("view_num"))
+                            .likeNum(rs.getInt("like_num"))
+                            .isLike(rs.getBoolean("is_like"))
+                            .createdAt(rs.getString("created_at"))
+                            .reviewImageUrls(Arrays.asList(
+                                    rs.getString("review_image_urls").split(",", -1))
+                            )
+                            .build());
+        } catch (Exception exception) {
+            log.error("getReviewSearchResult =  / " + exception.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
@@ -326,7 +377,7 @@ public class ReviewRepository {
     // NOTE: 리뷰 좋아요 OR 좋아요 취소
     public PostReviewLikeRes postReviewLike(long reviewId, long userId) throws BaseException {
         try {
-            log.info("in Repository postReviewLike / reviewId = " + reviewId + ", userId = " +userId);
+            log.info("in Repository postReviewLike / reviewId = " + reviewId + ", userId = " + userId);
             Boolean isLike = getReviewLike(reviewId, userId);
             if (isLike == null) {
                 String insertReviewLikeQuery = "INSERT INTO review_likes (review_id, user_id, is_like) VALUE (?, ?, ?);";
@@ -379,6 +430,7 @@ public class ReviewRepository {
         }
     }
 
+
     // NOTE: 리뷰 좋아요 한 이력이 있는지 알아보기
     public Boolean getReviewLike(long reviewId, long userId) throws BaseException {
         try {
@@ -394,5 +446,4 @@ public class ReviewRepository {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
-
 }
