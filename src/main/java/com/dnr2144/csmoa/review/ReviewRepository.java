@@ -2,7 +2,6 @@ package com.dnr2144.csmoa.review;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
-import com.dnr2144.csmoa.event_items.domain.PostEventItemLikeRes;
 import com.dnr2144.csmoa.firebase.FirebaseStorageManager;
 import com.dnr2144.csmoa.login.domain.GetUserInfoRes;
 import com.dnr2144.csmoa.review.domain.PostReviewLikeRes;
@@ -330,8 +329,8 @@ public class ReviewRepository {
             log.info("in Repository postReviewLike / reviewId = " + reviewId + ", userId = " +userId);
             Boolean isLike = getReviewLike(reviewId, userId);
             if (isLike == null) {
-                String insertEventItemLikeQuery = "INSERT INTO review_likes (review_id, user_id, is_like) VALUE (?, ?, ?);";
-                jdbcTemplate.update(insertEventItemLikeQuery, reviewId, userId, true);
+                String insertReviewLikeQuery = "INSERT INTO review_likes (review_id, user_id, is_like) VALUE (?, ?, ?);";
+                jdbcTemplate.update(insertReviewLikeQuery, reviewId, userId, true);
                 isLike = true;
             } else {
                 // 좋아요 <-> 싫어요

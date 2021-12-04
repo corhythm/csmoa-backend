@@ -3,11 +3,11 @@ package com.dnr2144.csmoa.recipe;
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
 import com.dnr2144.csmoa.login.UserRepository;
+import com.dnr2144.csmoa.recipe.domain.PostRecipeLikeRes;
 import com.dnr2144.csmoa.recipe.domain.PostRecipeReq;
 import com.dnr2144.csmoa.recipe.domain.PostRecipeRes;
 import com.dnr2144.csmoa.recipe.domain.model.DetailedRecipe;
 import com.dnr2144.csmoa.recipe.domain.model.Recipe;
-import com.dnr2144.csmoa.review.domain.model.Review;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -73,5 +73,20 @@ public class RecipeService {
             throw new BaseException(BaseResponseStatus.INVALID_RECIPE_ERROR);
         }
         return recipeRepository.getDetailedRecipe(userId, recipeId);
+    }
+
+    // NOTE: 레시피 좋아요 <-> 좋아요 취소
+    @Transactional // 동작을 안 해...
+    public PostRecipeLikeRes postRecipeLike(Long recipeId, Long userId) throws BaseException {
+        if (recipeId == null || userId == null || recipeId < 1 || userId < 1) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        if (userRepository.checkUserExists(userId) == 0) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        if (recipeRepository.checkRecipeExists(recipeId) == 0) {
+            throw new BaseException(BaseResponseStatus.INVALID_RECIPE_ERROR);
+        }
+        return recipeRepository.postRecipeLike(recipeId, userId);
     }
 }

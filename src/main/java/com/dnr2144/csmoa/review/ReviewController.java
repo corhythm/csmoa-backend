@@ -48,6 +48,7 @@ public class ReviewController {
         }
     }
 
+    // NOTE: 베스트 리뷰 가져오기
     @GetMapping("/best-reviews")
     public BaseResponse<List<Review>> getReviews(@RequestHeader("Access-Token") String accessToken) {
         if (accessToken == null) {
@@ -66,6 +67,7 @@ public class ReviewController {
         }
     }
 
+    // NOTE: 일반 리뷰 가져오기
     @GetMapping("/reviews")
     public BaseResponse<List<Review>> getReviews(@RequestHeader("Access-Token") String accessToken,
                                                  @RequestParam Integer page) {
@@ -85,6 +87,7 @@ public class ReviewController {
         }
     }
 
+    // NOTE: 리뷰 세부정보 가져오기
     @GetMapping("reviews/{reviewId}")
     public BaseResponse<DetailedReview> getDetailedReview(@PathVariable("reviewId") Long reviewId,
                                                           @RequestHeader("Access-Token") String accessToken) {
@@ -176,7 +179,7 @@ public class ReviewController {
         }
     }
 
-//    // NOTE: 리뷰 좋아요 / 좋아요 취소
+    // NOTE: 리뷰 좋아요 / 좋아요 취소
     @PostMapping("/reviews/{reviewId}/like")
     public BaseResponse<PostReviewLikeRes> postReviewLike(@PathVariable("reviewId") Long reviewId,
                                                   @RequestHeader("Access-Token") String accessToken) {

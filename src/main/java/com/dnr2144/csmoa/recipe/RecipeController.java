@@ -3,10 +3,12 @@ package com.dnr2144.csmoa.recipe;
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponse;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
+import com.dnr2144.csmoa.recipe.domain.PostRecipeLikeRes;
 import com.dnr2144.csmoa.recipe.domain.PostRecipeReq;
 import com.dnr2144.csmoa.recipe.domain.PostRecipeRes;
 import com.dnr2144.csmoa.recipe.domain.model.DetailedRecipe;
 import com.dnr2144.csmoa.recipe.domain.model.Recipe;
+import com.dnr2144.csmoa.review.domain.PostReviewLikeRes;
 import com.dnr2144.csmoa.util.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -100,6 +102,26 @@ public class RecipeController {
         } catch (BaseException ex) {
             ex.printStackTrace();
             log.error("((GET) / getDetailedRecipe): " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+    }
+
+    // NOTE: 레시피 좋아요 / 좋아요 취소
+    @PostMapping("/recipes/{recipeId}/like")
+    public BaseResponse<PostRecipeLikeRes> postRecipeLike(@PathVariable("recipeId") Long recipeId,
+                                                          @RequestHeader("Access-Token") String accessToken) {
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+        try {
+            long userId = jwtService.getUserId(accessToken);
+            log.info("recipeId = " + recipeId + ", userId = " + userId);
+            PostRecipeLikeRes postRecipeLikeRes = recipeService.postRecipeLike(recipeId, userId);
+            log.info("postRecipeLikeRes = " + postRecipeLikeRes.toString());
+            return new BaseResponse<>(postRecipeLikeRes);
+        } catch (BaseException ex) {
+            ex.printStackTrace();
+            log.error("postReviewLike: " + ex.getStatus().toString());
             return new BaseResponse<>(ex.getStatus());
         }
     }

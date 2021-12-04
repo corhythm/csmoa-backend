@@ -15,22 +15,25 @@ public class DetailedRecipe {
     private final String userNickname;
     private final String userProfileImageUrl;
     private final String recipeName;
+    @Setter private List<String> recipeImageUrls;
     @Setter private List<Ingredient> ingredients;
     private final String recipeContent;
-    private final Integer viewNum;
+    @Setter private Integer viewNum;
     private final Integer likeNum;
     private final Boolean isLike;
     private final String createdAt;
 
     @Builder
     public DetailedRecipe(Long recipeId, Long userId, String userNickname, String userProfileImageUrl,
-                          String recipeName, List<Ingredient> ingredients, String recipeContent, Integer viewNum, Integer likeNum, Boolean isLike, String createdAt) {
+                          String recipeName, List<String> recipeImageUrls, List<Ingredient> ingredients,
+                          String recipeContent, Integer viewNum, Integer likeNum, Boolean isLike, String createdAt) {
         this.recipeId = recipeId;
         this.userId = userId;
         this.userNickname = userNickname;
         this.userProfileImageUrl = userProfileImageUrl;
         this.recipeName = recipeName;
         this.ingredients = ingredients;
+        this.recipeImageUrls = recipeImageUrls;
         this.recipeContent = recipeContent;
         this.viewNum = viewNum;
         this.likeNum = likeNum;
