@@ -196,7 +196,7 @@ public class ReviewRepository {
         try {
             HashMap<String, Object> params = new HashMap<>();
             params.put("userId", userId);
-            params.put("pageNum", pageNum);
+            params.put("pageNum", (pageNum - 1) * 10);
 
             return namedParameterJdbcTemplate.query(ReviewSqlQuery.GET_MY_REVIEWS, params,
                     (rs, row) -> Review.builder()

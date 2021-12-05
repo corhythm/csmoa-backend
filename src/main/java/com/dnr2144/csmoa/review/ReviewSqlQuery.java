@@ -166,7 +166,7 @@ public class ReviewSqlQuery {
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
                     "          AND temp_review_likes.user_id = :userId)      AS is_like\n" +
                     "FROM reviews\n" +
-                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes GROUP BY review_id) AS review_likes\n" +
+                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes WHERE is_like = TRUE GROUP BY review_id) AS review_likes\n" +
                     "                   ON review_likes.review_id = reviews.review_id\n" +
                     "         LEFT JOIN (SELECT review_id, COUNT(*) AS view_num FROM review_histories GROUP BY review_id) AS review_views\n" +
                     "                   ON review_views.review_id = reviews.review_id\n" +
