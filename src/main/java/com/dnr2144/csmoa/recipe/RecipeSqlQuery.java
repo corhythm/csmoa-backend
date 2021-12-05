@@ -21,17 +21,26 @@ public class RecipeSqlQuery {
                     "       recipe_ingredients.ingredients,\n" +
                     "       recipe_likes.like_num,\n" +
                     "       recipe_views.view_num,\n" +
-                    "       recipe_images.image_src,\n" +
+                    "       recipe_images.image_src AS recipe_image_urls,\n" +
                     "       (SELECT temp_recipe_likes.is_like\n" +
                     "        FROM recipe_likes AS temp_recipe_likes\n" +
                     "        WHERE temp_recipe_likes.recipe_id = recipes.recipe_id\n" +
-                    "          AND temp_recipe_likes.user_id = :userId) AS is_like\n" +
+                    "          AND temp_recipe_likes.user_id = :userId) AS is_like,\n" +
+                    "       CASE\n" +
+                    "           WHEN (TIMESTAMPDIFF(YEAR, recipes.created_at, NOW()) > 1) # 일 년 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%y.%m.%d %H:%i')\n" +
+                    "           WHEN (TIMESTAMPDIFF(HOUR, recipes.created_at, NOW()) > 24) # 하루 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%m.%d %H:%i')\n" +
+                    "           WHEN (TIMESTAMPDIFF(MINUTE, recipes.created_at, NOW()) > 60) # 한 시간 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%H:%i')\n" +
+                    "           ELSE CONCAT(TIMESTAMPDIFF(MINUTE, recipes.created_at, NOW()), '분 전') # 한 시간 안 지났으면\n" +
+                    "           END                                    AS created_at\n" +
                     "FROM recipes\n" +
-                    "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS like_num FROM recipe_likes GROUP BY recipe_id) AS recipe_likes\n" +
+                    "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS like_num FROM recipe_likes WHERE is_like = true GROUP BY recipe_id) AS recipe_likes\n" +
                     "                   ON recipe_likes.recipe_id = recipes.recipe_id\n" +
                     "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS view_num FROM recipe_histories GROUP BY recipe_id) AS recipe_views\n" +
                     "                   ON recipe_views.recipe_id = recipes.recipe_id\n" +
-                    "         INNER JOIN (SELECT recipe_id, MAX(image_src) as image_src\n" +
+                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
                     "                     FROM recipe_images\n" +
                     "                     GROUP BY recipe_id) AS recipe_images\n" +
                     "                    ON recipe_images.recipe_id = recipes.recipe_id\n" +
@@ -48,23 +57,69 @@ public class RecipeSqlQuery {
                     "       recipe_ingredients.ingredients,\n" +
                     "       recipe_likes.like_num,\n" +
                     "       recipe_views.view_num,\n" +
-                    "       recipe_images.image_src,\n" +
+                    "       recipe_images.image_src AS recipe_image_urls,\n" +
                     "       (SELECT temp_recipe_likes.is_like\n" +
                     "        FROM recipe_likes AS temp_recipe_likes\n" +
                     "        WHERE temp_recipe_likes.recipe_id = recipes.recipe_id\n" +
-                    "          AND temp_recipe_likes.user_id = :userId) AS is_like\n" +
+                    "          AND temp_recipe_likes.user_id = :userId) AS is_like,\n" +
+                    "       CASE\n" +
+                    "           WHEN (TIMESTAMPDIFF(YEAR, recipes.created_at, NOW()) > 1) # 일 년 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%y.%m.%d %H:%i')\n" +
+                    "           WHEN (TIMESTAMPDIFF(HOUR, recipes.created_at, NOW()) > 24) # 하루 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%m.%d %H:%i')\n" +
+                    "           WHEN (TIMESTAMPDIFF(MINUTE, recipes.created_at, NOW()) > 60) # 한 시간 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%H:%i')\n" +
+                    "           ELSE CONCAT(TIMESTAMPDIFF(MINUTE, recipes.created_at, NOW()), '분 전') # 한 시간 안 지났으면\n" +
+                    "           END                                    AS created_at\n" +
                     "FROM recipes\n" +
-                    "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS like_num FROM recipe_likes GROUP BY recipe_id) AS recipe_likes\n" +
+                    "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS like_num FROM recipe_likes WHERE is_like = true GROUP BY recipe_id) AS recipe_likes\n" +
                     "                   ON recipe_likes.recipe_id = recipes.recipe_id\n" +
                     "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS view_num FROM recipe_histories GROUP BY recipe_id) AS recipe_views\n" +
                     "                   ON recipe_views.recipe_id = recipes.recipe_id\n" +
-                    "         INNER JOIN (SELECT recipe_id, MAX(image_src) as image_src\n" +
+                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
                     "                     FROM recipe_images\n" +
                     "                     GROUP BY recipe_id) AS recipe_images\n" +
                     "                    ON recipe_images.recipe_id = recipes.recipe_id\n" +
                     "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(ingredient_name SEPARATOR ' + ') AS ingredients\n" +
                     "                     FROM recipe_ingredients\n" +
                     "                     GROUP BY recipe_id) AS recipe_ingredients ON recipe_ingredients.recipe_id = recipes.recipe_id\n" +
+                    "ORDER BY recipe_id DESC\n" +
+                    "LIMIT :pageNum, 10";
+
+    public static String GET_RECIPE_SEARCH_RESULTS =
+            "SELECT recipes.recipe_id,\n" +
+                    "       recipes.recipe_title,\n" +
+                    "       recipes.recipe_content,\n" +
+                    "       recipe_ingredients.ingredients,\n" +
+                    "       recipe_likes.like_num,\n" +
+                    "       recipe_views.view_num,\n" +
+                    "       recipe_images.image_src AS recipe_image_urls,\n" +
+                    "       (SELECT temp_recipe_likes.is_like\n" +
+                    "        FROM recipe_likes AS temp_recipe_likes\n" +
+                    "        WHERE temp_recipe_likes.recipe_id = recipes.recipe_id\n" +
+                    "          AND temp_recipe_likes.user_id = :userId) AS is_like,\n" +
+                    "       CASE\n" +
+                    "           WHEN (TIMESTAMPDIFF(YEAR, recipes.created_at, NOW()) > 1) # 일 년 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%y.%m.%d %H:%i')\n" +
+                    "           WHEN (TIMESTAMPDIFF(HOUR, recipes.created_at, NOW()) > 24) # 하루 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%m.%d %H:%i')\n" +
+                    "           WHEN (TIMESTAMPDIFF(MINUTE, recipes.created_at, NOW()) > 60) # 한 시간 지나면\n" +
+                    "               THEN DATE_FORMAT(recipes.created_at, '%H:%i')\n" +
+                    "           ELSE CONCAT(TIMESTAMPDIFF(MINUTE, recipes.created_at, NOW()), '분 전') # 한 시간 안 지났으면\n" +
+                    "           END                                    AS created_at\n" +
+                    "FROM recipes\n" +
+                    "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS like_num FROM recipe_likes WHERE is_like = true GROUP BY recipe_id) AS recipe_likes\n" +
+                    "                   ON recipe_likes.recipe_id = recipes.recipe_id\n" +
+                    "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS view_num FROM recipe_histories GROUP BY recipe_id) AS recipe_views\n" +
+                    "                   ON recipe_views.recipe_id = recipes.recipe_id\n" +
+                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
+                    "                     FROM recipe_images\n" +
+                    "                     GROUP BY recipe_id) AS recipe_images\n" +
+                    "                    ON recipe_images.recipe_id = recipes.recipe_id\n" +
+                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(ingredient_name SEPARATOR ' + ') AS ingredients\n" +
+                    "                     FROM recipe_ingredients\n" +
+                    "                     GROUP BY recipe_id) AS recipe_ingredients ON recipe_ingredients.recipe_id = recipes.recipe_id\n" +
+                    "WHERE recipe_title LIKE :searchWord\n" +
                     "ORDER BY recipe_id DESC\n" +
                     "LIMIT :pageNum, 10";
 
@@ -91,7 +146,7 @@ public class RecipeSqlQuery {
                     "           ELSE CONCAT(TIMESTAMPDIFF(MINUTE, recipes.created_at, NOW()), '분 전') # 한 시간 안 지났으면\n" +
                     "           END                                         AS created_at\n" +
                     "FROM recipes\n" +
-                    "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS like_num FROM recipe_likes GROUP BY recipe_id) AS recipe_likes\n" +
+                    "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS like_num FROM recipe_likes WHERE is_like = true GROUP BY recipe_id) AS recipe_likes\n" +
                     "                   ON recipe_likes.recipe_id = recipes.recipe_id\n" +
                     "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS view_num FROM recipe_histories GROUP BY recipe_id) AS recipe_views\n" +
                     "                   ON recipe_views.recipe_id = recipes.recipe_id\n" +

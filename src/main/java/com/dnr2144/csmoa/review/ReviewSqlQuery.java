@@ -2,14 +2,14 @@ package com.dnr2144.csmoa.review;
 
 public class ReviewSqlQuery {
 
-//    public static String INSERT_REVIEW = "INSERT INTO reviews (user_id, item_name, item_price, " +
-//            "item_star_score, cs_brand) VALUE (:userId, :itemName, :itemPrice, :itemStarScore, :csBrand)";
-
+    // NOTE: 리뷰 등록
     public static String INSERT_REVIEW = "INSERT INTO reviews (user_id, item_name, item_price, " +
             "item_star_score, cs_brand, content) VALUE (?, ?, ?, ?, ?, ?)";
 
+    // NOTE: 리뷰 이미지 삽입
     public static String INSERT_REVIEW_IMAGES = "INSERT INTO review_images (review_id, image_src) value (:reviewId, :imageSrc)";
 
+    // NOTE: 이번주 베스트 리뷰 가져오기
     public static String GET_BEST_REVIEWS =
             "SELECT reviews.review_id,\n" +
                     "       reviews.user_id,\n" +
@@ -36,7 +36,7 @@ public class ReviewSqlQuery {
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
                     "          AND temp_review_likes.user_id = ?) AS is_like\n" +
                     "FROM reviews\n" +
-                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes GROUP BY review_id) AS review_likes\n" +
+                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes WHERE is_like = TRUE GROUP BY review_id) AS review_likes\n" +
                     "                   ON review_likes.review_id = reviews.review_id\n" +
                     "         LEFT JOIN (SELECT review_id, COUNT(*) AS view_num FROM review_histories GROUP BY review_id) AS review_views\n" +
                     "                   ON review_views.review_id = reviews.review_id\n" +
@@ -52,6 +52,7 @@ public class ReviewSqlQuery {
                     "ORDER BY (reviews.item_star_score + like_num + view_num + comment_num) DESC\n" +
                     "LIMIT ?, 15;";
 
+    // NOTE: 일반 리뷰 가져오기
     public static String GET_REVIEWS =
             "SELECT reviews.review_id,\n" +
                     "       reviews.user_id,\n" +
@@ -78,7 +79,7 @@ public class ReviewSqlQuery {
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
                     "          AND temp_review_likes.user_id = :userId) AS is_like\n" +
                     "FROM reviews\n" +
-                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes GROUP BY review_id) AS review_likes\n" +
+                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes WHERE is_like = TRUE GROUP BY review_id) AS review_likes\n" +
                     "                   ON review_likes.review_id = reviews.review_id\n" +
                     "         LEFT JOIN (SELECT review_id, COUNT(*) AS view_num FROM review_histories GROUP BY review_id) AS review_views\n" +
                     "                   ON review_views.review_id = reviews.review_id\n" +
@@ -94,6 +95,7 @@ public class ReviewSqlQuery {
                     "ORDER BY reviews.created_at desc\n" +
                     "LIMIT :pageNum, 10";
 
+    // NOTE: 리뷰 검색
     public static String GET_REVIEW_SEARCH_RESULTS =
             "SELECT reviews.review_id,\n" +
                     "       reviews.user_id,\n" +
@@ -120,7 +122,7 @@ public class ReviewSqlQuery {
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
                     "          AND temp_review_likes.user_id = :userId)      AS is_like\n" +
                     "FROM reviews\n" +
-                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes GROUP BY review_id) AS review_likes\n" +
+                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes WHERE is_like = TRUE GROUP BY review_id) AS review_likes\n" +
                     "                   ON review_likes.review_id = reviews.review_id\n" +
                     "         LEFT JOIN (SELECT review_id, COUNT(*) AS view_num FROM review_histories GROUP BY review_id) AS review_views\n" +
                     "                   ON review_views.review_id = reviews.review_id\n" +
@@ -137,6 +139,7 @@ public class ReviewSqlQuery {
                     "ORDER BY reviews.created_at desc\n" +
                     "LIMIT :pageNum, 10";
 
+    // NOTE: 세부 리뷰 가져오기
     public static String GET_DETAILED_REVIEW =
             "SELECT reviews.review_id,\n" +
                     "       reviews.user_id,\n" +
@@ -162,7 +165,7 @@ public class ReviewSqlQuery {
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
                     "          AND temp_review_likes.user_id = :userId)      AS is_like\n" +
                     "FROM reviews\n" +
-                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes GROUP BY review_id) AS review_likes\n" +
+                    "         LEFT JOIN (SELECT review_id, COUNT(*) AS like_num FROM review_likes WHERE is_like = TRUE GROUP BY review_id) AS review_likes\n" +
                     "                   ON review_likes.review_id = reviews.review_id\n" +
                     "         LEFT JOIN (SELECT review_id, COUNT(*) AS view_num FROM review_histories GROUP BY review_id) AS review_views\n" +
                     "                   ON review_views.review_id = reviews.review_id\n" +

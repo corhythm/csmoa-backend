@@ -122,8 +122,8 @@ public class ReviewRepository {
             HashMap<String, Object> params = new HashMap<>();
             params.put("userId", userId);
             params.put("pageNum", (pageNum - 1) * 10);
-            String query = null;
 
+            String query = null;
             if (searchWord == null) { // 일반 리뷰
                 log.info("(in ReviewRepository) 일반 리뷰");
                 query = ReviewSqlQuery.GET_REVIEWS;

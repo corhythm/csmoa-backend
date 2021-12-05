@@ -48,7 +48,7 @@ public class RecipeService {
     }
 
     // NOTE: 일반 레시피 가져오기
-    public List<Recipe> getRecipes(Long userId, Integer pageNum) throws BaseException {
+    public List<Recipe> getRecipes(Long userId, String searchWord, Integer pageNum) throws BaseException {
         if (userId == null || pageNum == null || userId < 0 || pageNum < 0) { // 입력값 null 체크
             throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
         }
@@ -56,7 +56,7 @@ public class RecipeService {
         if (userRepository.checkUserExists(userId) == 0) {
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
         }
-        return recipeRepository.getRecipes(userId, pageNum);
+        return recipeRepository.getRecipes(userId, searchWord, pageNum);
     }
 
     // NOTE: 레시피 세부 정보 가져오기

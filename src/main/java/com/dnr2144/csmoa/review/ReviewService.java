@@ -27,12 +27,10 @@ public class ReviewService {
     // NOTE: 리뷰 등록
     @Transactional
     public PostReviewRes postReview(long userId, PostReviewReq postReviewReq) throws BaseException {
-
         // 존재하지 않는 유저일 때
         if (userRepository.checkUserExists(userId) == 0) {
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
         }
-
         // null 체크
         if (postReviewReq == null || postReviewReq.getReviewImages() == null || postReviewReq.getTitle() == null ||
                 postReviewReq.getPrice() == null || postReviewReq.getRating() == null || postReviewReq.getCategory() == null ||
@@ -49,7 +47,6 @@ public class ReviewService {
         if (userId == null) { // 입력값 null 체크
             throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
         }
-
         // 존재하지 않는 유저일 때
         if (userRepository.checkUserExists(userId) == 0) {
             throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);

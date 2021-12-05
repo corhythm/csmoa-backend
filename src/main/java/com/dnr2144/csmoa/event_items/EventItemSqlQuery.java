@@ -19,11 +19,11 @@ public class EventItemSqlQuery {
                     "        WHERE temp_event_item_likes.event_item_id = event_items.event_item_id\n" +
                     "          AND temp_event_item_likes.user_id = :userId)          AS is_like\n" +
                     "FROM event_items\n" +
-                    "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS view_count\n" +
+                    "         LEFT JOIN (SELECT event_item_id, count(event_item_id) AS view_count\n" +
                     "                     FROM event_item_histories\n" +
                     "                     GROUP BY event_item_id) AS event_item_histories\n" +
                     "                    ON event_item_histories.event_item_id = event_items.event_item_id\n" +
-                    "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS like_count\n" +
+                    "         LEFT JOIN (SELECT event_item_id, count(event_item_id) AS like_count\n" +
                     "                     FROM event_item_likes\n" +
                     "                     WHERE is_like = true\n" +
                     "                     GROUP BY event_item_id) AS event_item_likes\n" +
@@ -82,11 +82,11 @@ public class EventItemSqlQuery {
             "        WHERE temp_event_item_likes.event_item_id = event_items.event_item_id\n" +
             "          AND temp_event_item_likes.user_id = ?)          AS is_like\n" +
             "FROM event_items\n" +
-            "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS view_count\n" +
+            "         LEFT JOIN (SELECT event_item_id, count(event_item_id) AS view_count\n" +
             "                     FROM event_item_histories\n" +
             "                     GROUP BY event_item_id) AS event_item_histories\n" +
             "                    ON event_item_histories.event_item_id = event_items.event_item_id\n" +
-            "         INNER JOIN (SELECT event_item_id, count(event_item_id) AS like_count\n" +
+            "         LEFT JOIN (SELECT event_item_id, count(event_item_id) AS like_count\n" +
             "                     FROM event_item_likes\n" +
             "                     WHERE is_like = true\n" +
             "                     GROUP BY event_item_id) AS event_item_likes\n" +

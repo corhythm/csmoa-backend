@@ -28,7 +28,8 @@ public class RecipeController {
 
     // NOTE: 레시피 등록
     @PostMapping("/recipes")
-    public BaseResponse<PostRecipeRes> postRecipe(@RequestHeader("Access-Token") String accessToken, PostRecipeReq postRecipeReq) {
+    public BaseResponse<PostRecipeRes> postRecipe(@RequestHeader("Access-Token") String accessToken,
+                                                  PostRecipeReq postRecipeReq) {
         if (accessToken == null) {
             return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
         }
@@ -68,14 +69,15 @@ public class RecipeController {
     // NOTE: 레시피 가져오기
     @GetMapping("/recipes")
     public BaseResponse<List<Recipe>> getRecipes(@RequestHeader("Access-Token") String accessToken,
+                                                 @RequestParam(required = false, value = "search") String searchWord,
                                                  @RequestParam("page") Integer pageNum) {
         if (accessToken == null) {
             return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
         }
         try {
             long userId = jwtService.getUserId(accessToken);
-            log.info("/recipes / userId = " + userId);
-            List<Recipe> recipes = recipeService.getRecipes(userId, pageNum);
+            log.info("/recipes / userId = " + userId + ", searchWord = " + searchWord + ", page = " + pageNum);
+            List<Recipe> recipes = recipeService.getRecipes(userId, searchWord, pageNum);
             log.info("recipes.size = " + recipes.size() +
                     ", recipes = " + recipes.toString());
             return new BaseResponse<>(recipes);

@@ -9,7 +9,6 @@ import com.dnr2144.csmoa.recipe.domain.PostRecipeRes;
 import com.dnr2144.csmoa.recipe.domain.model.DetailedRecipe;
 import com.dnr2144.csmoa.recipe.domain.model.Ingredient;
 import com.dnr2144.csmoa.recipe.domain.model.Recipe;
-import com.dnr2144.csmoa.review.domain.PostReviewLikeRes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,7 +123,10 @@ public class RecipeRepository {
                             .likeNum(rs.getInt("like_num"))
                             .viewNum(rs.getInt("view_num"))
                             .isLike(rs.getBoolean("is_like"))
-                            .recipeMainImageUrl(rs.getString("image_src"))
+                            .recipeImageUrls(Arrays.asList(
+                                    rs.getString("recipe_image_urls").split(",", -1))
+                            )
+                            .createdAt(rs.getString("created_at"))
                             .build());
 
         } catch (Exception exception) {
@@ -135,13 +137,24 @@ public class RecipeRepository {
     }
 
     // NOTE: 일반 레시피 리스트 받아오기)
-    public List<Recipe> getRecipes(long userId, int pageNum) throws BaseException {
+    public List<Recipe> getRecipes(long userId, String searchWord, int pageNum) throws BaseException {
         try {
             HashMap<String, Object> params = new HashMap<>();
             params.put("userId", userId);
             params.put("pageNum", (pageNum - 1) * 10);
 
-            return namedParameterJdbcTemplate.query(RecipeSqlQuery.GET_RECIPES, params,
+            String query = "";
+            if (searchWord == null) { // 일반 리뷰
+                log.info("(in ReviewRepository) 일반 레시피");
+                query = RecipeSqlQuery.GET_RECIPES;
+
+            } else { // 검색된 레시피
+                params.put("searchWord", "%" + searchWord + "%");
+                log.info("(in ReviewRepository) 레시피 검색");
+                query = RecipeSqlQuery.GET_RECIPE_SEARCH_RESULTS;
+            }
+
+            return namedParameterJdbcTemplate.query(query, params,
                     (rs, row) -> Recipe.builder()
                             .recipeId(rs.getLong("recipe_id"))
                             .recipeName(rs.getString("recipe_title"))
@@ -150,7 +163,10 @@ public class RecipeRepository {
                             .likeNum(rs.getInt("like_num"))
                             .viewNum(rs.getInt("view_num"))
                             .isLike(rs.getBoolean("is_like"))
-                            .recipeMainImageUrl(rs.getString("image_src"))
+                            .recipeImageUrls(Arrays.asList(
+                                    rs.getString("recipe_image_urls").split(",", -1))
+                            )
+                            .createdAt(rs.getString("created_at"))
                             .build());
 
         } catch (Exception exception) {
