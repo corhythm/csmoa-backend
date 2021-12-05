@@ -1,9 +1,9 @@
 package com.dnr2144.csmoa.java_test;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.util.MultiValueMap;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class JustJavaTest {
 
@@ -16,4 +16,9 @@ public class JustJavaTest {
             System.out.println(reviewUrl);
         }
     }
+
+    @Test
+    void multiValueMapTest() {
+    }
+
 }

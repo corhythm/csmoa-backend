@@ -37,4 +37,8 @@ class RecipeControllerTest {
                 .andExpect(content().json(content));
     }
 
+    @Test
+    void StringSplitTest() {
+
+    }
 }

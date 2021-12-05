@@ -65,7 +65,6 @@ public class RecipeController {
         }
     }
 
-
     // NOTE: 레시피 가져오기
     @GetMapping("/recipes")
     public BaseResponse<List<Recipe>> getRecipes(@RequestHeader("Access-Token") String accessToken,

@@ -199,6 +199,26 @@ public class ReviewController {
             return new BaseResponse<>(ex.getStatus());
         }
     }
+
+    // NOTE: 내가 작성한 리뷰 가져오기
+    @GetMapping("/my-reviews")
+    public BaseResponse<List<Review>> getMyReviews(@RequestHeader("Access-Token") String accessToken,
+                                                   @RequestParam("page") Integer pageNum) {
+        if (accessToken == null) {
+            return new BaseResponse<>(BaseResponseStatus.EMPTY_JWT);
+        }
+        try {
+            long userId = jwtService.getUserId(accessToken);
+            log.info("userId = " + userId + ", pageNum = " + pageNum);
+            List<Review> myReviews = reviewService.getMyReviews(userId, pageNum);
+            log.info("myReviews = " + myReviews);
+            return new BaseResponse<>(myReviews);
+        } catch (BaseException ex) {
+            ex.printStackTrace();
+            log.error("getMyReviews: " + ex.getStatus().toString());
+            return new BaseResponse<>(ex.getStatus());
+        }
+    }
 }
 
 

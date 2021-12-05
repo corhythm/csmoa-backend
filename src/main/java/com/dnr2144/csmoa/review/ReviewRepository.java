@@ -191,6 +191,39 @@ public class ReviewRepository {
         }
     }
 
+    // NOTE: 내가 쓴 리뷰 가져오기
+    public List<Review> getMyReviews(long userId, int pageNum) throws BaseException {
+        try {
+            HashMap<String, Object> params = new HashMap<>();
+            params.put("userId", userId);
+            params.put("pageNum", pageNum);
+
+            return namedParameterJdbcTemplate.query(ReviewSqlQuery.GET_MY_REVIEWS, params,
+                    (rs, row) -> Review.builder()
+                            .reviewId(rs.getLong("review_id"))
+                            .userId(rs.getLong("user_id"))
+                            .reviewName(rs.getString("item_name"))
+                            .price(rs.getString("item_price"))
+                            .starScore(rs.getFloat("item_star_score"))
+                            .csBrand(rs.getString("cs_brand"))
+                            .commentNum(rs.getInt("comment_num"))
+                            .content(rs.getString("content"))
+                            .viewNum(rs.getInt("view_num"))
+                            .likeNum(rs.getInt("like_num"))
+                            .isLike(rs.getBoolean("is_like"))
+                            .createdAt(rs.getString("created_at"))
+                            .reviewImageUrls(Arrays.asList(
+                                    rs.getString("review_image_urls").split(",", -1))
+                            )
+                            .build());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.info("In ReviewRepository, getMyReviews" + ex.getMessage());
+            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        }
+    }
+
     // NOTE: 리뷰 세부정보 가져오기
     public DetailedReview getDetailedReview(long reviewId, long userId) throws BaseException {
         try {
@@ -429,7 +462,6 @@ public class ReviewRepository {
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
-
 
     // NOTE: 리뷰 좋아요 한 이력이 있는지 알아보기
     public Boolean getReviewLike(long reviewId, long userId) throws BaseException {

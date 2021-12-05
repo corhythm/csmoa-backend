@@ -139,4 +139,15 @@ public class ReviewService {
         }
         return reviewRepository.postReviewLike(reviewId, userId);
     }
+
+    // NOTE: 내가 쓴 리뷰 가져오기
+    public List<Review> getMyReviews(Long userId, Integer pageNum) throws BaseException {
+        if (userId == null || pageNum == null || userId < 1 || pageNum < 1) {
+            throw new BaseException(BaseResponseStatus.REQUEST_ERROR);
+        }
+        if (userRepository.checkUserExists(userId) == 0) {
+            throw new BaseException(BaseResponseStatus.INVALID_ACCOUNT_ERROR);
+        }
+        return reviewRepository.getMyReviews(userId, pageNum);
+    }
 }
