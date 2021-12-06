@@ -135,7 +135,8 @@ public class ReviewSqlQuery {
                     "                     FROM review_images\n" +
                     "                     GROUP BY review_id) AS review_images\n" +
                     "                    ON review_images.review_id = reviews.review_id\n" +
-                    "WHERE item_name LIKE :searchWord\n" +
+//                    "WHERE item_name LIKE :searchWord\n" +
+                    "WHERE MATCH(reviews.item_name, reviews.content) AGAINST(:searchWord IN BOOLEAN MODE)\n" +
                     "ORDER BY reviews.created_at desc\n" +
                     "LIMIT :pageNum, 10";
 

@@ -77,7 +77,7 @@ public class ReviewController {
         }
         try {
             long userId = jwtService.getUserId(accessToken);
-            log.info("/reviews / userId = " + userId + ", pageNum = " + pageNum);
+            log.info("/reviews / userId = " + userId + ", searchWord = " + searchWord + ", pageNum = " + pageNum);
             List<Review> reviews = reviewService.getReviews(userId, searchWord, pageNum);
             log.info("reviews = " + reviews);
             return new BaseResponse<>(reviews);

@@ -129,7 +129,8 @@ public class ReviewRepository {
                 query = ReviewSqlQuery.GET_REVIEWS;
 
             } else { // 검색된 리뷰
-                params.put("searchWord", "%" + searchWord + "%");
+//                params.put("searchWord", "%" + searchWord + "%");
+                params.put("searchWord", "*" + searchWord + "*");
                 log.info("(in ReviewRepository) 리뷰 검색");
                 query = ReviewSqlQuery.GET_REVIEW_SEARCH_RESULTS;
             }
@@ -156,37 +157,6 @@ public class ReviewRepository {
         } catch (Exception exception) {
             exception.printStackTrace();
             log.info("(in ReviewRepository, getReviews) " + exception.getMessage());
-            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
-        }
-    }
-
-    // NOTE: 리뷰 검색 결과 가져오기
-    public List<Review> getReviewSearchResult(long userId, String searchWord, int pageNum) throws BaseException {
-        try {
-            log.info("리뷰리포지토리 / userId = " + userId + ", searchWord = " + searchWord + ", pageNum = " + pageNum);
-            HashMap<String, Object> params = new HashMap<>();
-            params.put("userId", userId);
-            params.put("searchWord", "%" + searchWord + "%");
-            params.put("pageNum", (pageNum - 1) * 10);
-
-            return namedParameterJdbcTemplate.query(ReviewSqlQuery.GET_REVIEW_SEARCH_RESULTS, params,
-                    (rs, row) -> Review.builder()
-                            .reviewId(rs.getLong("review_id"))
-                            .reviewName(rs.getString("item_name"))
-                            .price(rs.getString("item_price"))
-                            .starScore(rs.getFloat("item_star_score"))
-                            .csBrand(rs.getString("cs_brand"))
-                            .commentNum(rs.getInt("comment_num"))
-                            .viewNum(rs.getInt("view_num"))
-                            .likeNum(rs.getInt("like_num"))
-                            .isLike(rs.getBoolean("is_like"))
-                            .createdAt(rs.getString("created_at"))
-                            .reviewImageUrls(Arrays.asList(
-                                    rs.getString("review_image_urls").split(",", -1))
-                            )
-                            .build());
-        } catch (Exception exception) {
-            log.error("getReviewSearchResult =  / " + exception.getMessage());
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
