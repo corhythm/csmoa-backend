@@ -103,7 +103,7 @@ public class EventItemSqlQuery {
             "       cs_brand,\n" +
             "       item_event_type\n" +
             "FROM event_items\n" +
-            "WHERE item_category != '생활용품' AND item_price BETWEEN ? AND ?\n" +
+            "WHERE event_items.event_item_id != ? AND item_category != '생활용품' AND item_price BETWEEN ? AND ?\n" +
             "LIMIT 20;";
 
 }

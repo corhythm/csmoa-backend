@@ -136,7 +136,7 @@ public class EventItemRepository {
                             .itemCategory(rs.getString("item_category"))
                             .csBrand(rs.getString("cs_brand"))
                             .itemEventType(rs.getString("item_event_type"))
-                            .build()), itemPrice - 938, itemPrice + 1928);
+                            .build()), eventItemId, itemPrice - 938, itemPrice + 1928);
 
             return GetDetailEventItemRes.builder()
                     .detailEventItem(detailEventItem)
