@@ -2,18 +2,20 @@ package com.dnr2144.csmoa.recipe;
 
 public class RecipeSqlQuery {
 
-    // // select recipe_id, user_id, recipe_title, recipe_content, created_at, updated_at, status from recipes;
+    // NOTE: 레시피 삽입
     public static final String INSERT_RECIPE =
             "INSERT INTO recipes (user_id, recipe_title, recipe_content) VALUE (?, ?, ?)";
 
+    // NOTE: 레시피 이미지 삽입
     public static String INSERT_RECIPE_IMAGES =
             "INSERT INTO recipe_images (recipe_id, image_src) value (:recipeId, :imageSrc)"; // 테스트
 
-    // INSERT INTO recipe_ingredients (recipe_ingredient_id, recipe_id, ingredient_name, ingredient_price, csBrand, created_at, updated_at, status) VALUE ()
+    // NOTE: 레시피 재료 삽입
     public static String INSERT_RECIPE_INGREDIENT =
             "INSERT INTO recipe_ingredients (recipe_id, ingredient_name, ingredient_price, cs_brand) " +
                     "VALUE (:recipeId, :ingredientName, :ingredientPrice, :csBrand)";
 
+    // NOTE: 추천 레시피 가져오기
     public static String GET_RECOMMENDED_RECIPES =
             "SELECT recipes.recipe_id,\n" +
                     "       recipes.recipe_title,\n" +
@@ -50,6 +52,7 @@ public class RecipeSqlQuery {
                     "ORDER BY (like_num + view_num) DESC\n" +
                     "LIMIT :randomOffset, 10";
 
+    // NOTE: 레시피 가져오기
     public static String GET_RECIPES =
             "SELECT recipes.recipe_id,\n" +
                     "       recipes.recipe_title,\n" +
@@ -86,6 +89,7 @@ public class RecipeSqlQuery {
                     "ORDER BY recipe_id DESC\n" +
                     "LIMIT :pageNum, 10";
 
+    // NOTE: 레시피 검색 결과 가져오기
     public static String GET_RECIPE_SEARCH_RESULTS =
             "SELECT recipes.recipe_id,\n" +
                     "       recipes.recipe_title,\n" +
@@ -119,7 +123,8 @@ public class RecipeSqlQuery {
                     "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(ingredient_name SEPARATOR ' + ') AS ingredients\n" +
                     "                     FROM recipe_ingredients\n" +
                     "                     GROUP BY recipe_id) AS recipe_ingredients ON recipe_ingredients.recipe_id = recipes.recipe_id\n" +
-                    "WHERE recipe_title LIKE :searchWord\n" +
+//                    "WHERE recipe_title LIKE :searchWord\n" +
+                    "WHERE MATCH(recipes.recipe_title, recipes.recipe_content) AGAINST(:searchWord IN BOOLEAN MODE)\n" +
                     "ORDER BY recipe_id DESC\n" +
                     "LIMIT :pageNum, 10";
 

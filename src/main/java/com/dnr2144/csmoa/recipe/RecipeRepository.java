@@ -149,7 +149,8 @@ public class RecipeRepository {
                 query = RecipeSqlQuery.GET_RECIPES;
 
             } else { // 검색된 레시피
-                params.put("searchWord", "%" + searchWord + "%");
+//                params.put("searchWord", "%" + searchWord + "%");
+                params.put("searchWord", "*" + searchWord + "*");
                 log.info("(in ReviewRepository) 레시피 검색");
                 query = RecipeSqlQuery.GET_RECIPE_SEARCH_RESULTS;
             }
