@@ -1,12 +1,12 @@
-package com.dnr2144.csmoa.eventitems;
+package com.dnr2144.csmoa.eventitem;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponse;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
-import com.dnr2144.csmoa.eventitems.domain.GetDetailEventItemRes;
-import com.dnr2144.csmoa.eventitems.domain.PostEventItemHistoryAndLikeReq;
-import com.dnr2144.csmoa.eventitems.domain.PostEventItemLikeRes;
-import com.dnr2144.csmoa.eventitems.model.EventItem;
+import com.dnr2144.csmoa.eventitem.domain.GetDetailEventItemRes;
+import com.dnr2144.csmoa.eventitem.domain.PostEventItemHistoryAndLikeReq;
+import com.dnr2144.csmoa.eventitem.domain.PostEventItemLikeRes;
+import com.dnr2144.csmoa.eventitem.model.EventItem;
 import com.dnr2144.csmoa.util.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
