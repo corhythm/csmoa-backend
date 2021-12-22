@@ -1,4 +1,4 @@
-package com.dnr2144.csmoa.eventitems.model;
+package com.dnr2144.csmoa.eventitem.model;
 
 import lombok.Builder;
 import lombok.Getter;

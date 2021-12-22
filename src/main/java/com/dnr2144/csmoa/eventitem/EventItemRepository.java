@@ -1,10 +1,10 @@
-package com.dnr2144.csmoa.eventitems;
+package com.dnr2144.csmoa.eventitem;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
-import com.dnr2144.csmoa.eventitems.domain.GetDetailEventItemRes;
-import com.dnr2144.csmoa.eventitems.domain.PostEventItemLikeRes;
-import com.dnr2144.csmoa.eventitems.model.EventItem;
+import com.dnr2144.csmoa.eventitem.domain.GetDetailEventItemRes;
+import com.dnr2144.csmoa.eventitem.domain.PostEventItemLikeRes;
+import com.dnr2144.csmoa.eventitem.model.EventItem;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
