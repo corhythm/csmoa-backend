@@ -1,4 +1,4 @@
-package com.dnr2144.csmoa.event_items.domain;
+package com.dnr2144.csmoa.eventitems.domain;
 
 import lombok.Getter;
 import lombok.ToString;

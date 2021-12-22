@@ -1,6 +1,6 @@
-package com.dnr2144.csmoa.event_items.domain;
+package com.dnr2144.csmoa.eventitems.domain;
 
-import com.dnr2144.csmoa.event_items.model.EventItem;
+import com.dnr2144.csmoa.eventitems.model.EventItem;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;

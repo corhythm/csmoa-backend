@@ -1,4 +1,4 @@
-package com.dnr2144.csmoa.event_items;
+package com.dnr2144.csmoa.eventitems;
 
 public class EventItemSqlQuery {
 

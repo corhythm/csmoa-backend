@@ -69,7 +69,7 @@ public class FirebaseStorageManager {
     // NOTE: 리뷰 사진 저장
     public List<String> saveReviewImages(long userId, List<MultipartFile> reviewImages) throws IOException {
         Bucket bucket = StorageClient.getInstance().bucket();
-        List<String> reviewImageUrls = new ArrayList();
+        List<String> reviewImageUrls = new ArrayList<>();
 
         for (MultipartFile reviewImage : reviewImages) {
             String fileName = userId + "_" + UUID.randomUUID();
@@ -81,14 +81,13 @@ public class FirebaseStorageManager {
                     BUCKET_NAME, recipe, fileName);
             reviewImageUrls.add(absoluteFilePathUrl);
         }
-
         return reviewImageUrls;
     }
 
     // NOTE: 레시피 사진 저장
     public List<String> saveRecipeImages(long userId, List<MultipartFile> recipeImages) throws IOException {
         Bucket bucket = StorageClient.getInstance().bucket();
-        List<String> recipeImageUrls = new ArrayList();
+        List<String> recipeImageUrls = new ArrayList<>();
 
         for (MultipartFile recipeImage : recipeImages) {
             String fileName = userId + "_" + UUID.randomUUID();
@@ -100,7 +99,6 @@ public class FirebaseStorageManager {
                     BUCKET_NAME, recipe, fileName);
             recipeImageUrls.add(absoluteFilePathUrl);
         }
-
         return recipeImageUrls;
     }
 }

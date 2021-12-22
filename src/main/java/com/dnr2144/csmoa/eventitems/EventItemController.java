@@ -1,12 +1,12 @@
-package com.dnr2144.csmoa.event_items;
+package com.dnr2144.csmoa.eventitems;
 
 import com.dnr2144.csmoa.config.BaseException;
 import com.dnr2144.csmoa.config.BaseResponse;
 import com.dnr2144.csmoa.config.BaseResponseStatus;
-import com.dnr2144.csmoa.event_items.domain.GetDetailEventItemRes;
-import com.dnr2144.csmoa.event_items.domain.PostEventItemHistoryAndLikeReq;
-import com.dnr2144.csmoa.event_items.domain.PostEventItemLikeRes;
-import com.dnr2144.csmoa.event_items.model.EventItem;
+import com.dnr2144.csmoa.eventitems.domain.GetDetailEventItemRes;
+import com.dnr2144.csmoa.eventitems.domain.PostEventItemHistoryAndLikeReq;
+import com.dnr2144.csmoa.eventitems.domain.PostEventItemLikeRes;
+import com.dnr2144.csmoa.eventitems.model.EventItem;
 import com.dnr2144.csmoa.util.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.lang.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 
 @Controller
 @RequiredArgsConstructor
