@@ -8,7 +8,7 @@ public class EventItemSqlQuery {
                     "       item_name,\n" +
                     "       CONCAT(FORMAT(item_price, 0), '원') AS item_price,\n" +
                     "       CONCAT('(개당 ', FORMAT(item_actual_price, 0), '원)') AS item_actual_price,\n" +
-                    "       item_image_src,\n" +
+                    "       item_image_url,\n" +
                     "       item_category,\n" +
                     "       cs_brand,\n" +
                     "       item_event_type,\n" +
@@ -40,7 +40,7 @@ public class EventItemSqlQuery {
             "       item_name,\n" +
             "       CONCAT(FORMAT(event_items.item_price, 0), '원') AS item_price,\n" +
             "       CONCAT('(개당 ', FORMAT(event_items.item_actual_price, 0), '원)') as item_actual_price,\n" +
-            "       item_image_src,\n" +
+            "       item_image_url,\n" +
             "       item_category,\n" +
             "       cs_brand,\n" +
             "       item_event_type,\n" +
@@ -71,7 +71,7 @@ public class EventItemSqlQuery {
             "       item_name,\n" +
             "       CONCAT(FORMAT(event_items.item_price, 0), '원')                 AS item_price,\n" +
             "       CONCAT('(개당 ', FORMAT(event_items.item_actual_price, 0), '원)') AS item_actual_price,\n" +
-            "       item_image_src,\n" +
+            "       item_image_url,\n" +
             "       item_category,\n" +
             "       cs_brand,\n" +
             "       item_event_type,\n" +
@@ -98,7 +98,7 @@ public class EventItemSqlQuery {
             "       item_name,\n" +
             "       CONCAT(FORMAT(event_items.item_price, 0), '원')                 AS item_price,\n" +
             "       CONCAT('(개당 ', FORMAT(event_items.item_actual_price, 0), '원)') AS item_actual_price,\n" +
-            "       item_image_src,\n" +
+            "       item_image_url,\n" +
             "       item_category,\n" +
             "       cs_brand,\n" +
             "       item_event_type\n" +

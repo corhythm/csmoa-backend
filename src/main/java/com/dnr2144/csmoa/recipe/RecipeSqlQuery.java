@@ -8,7 +8,7 @@ public class RecipeSqlQuery {
 
     // NOTE: 레시피 이미지 삽입
     public static String INSERT_RECIPE_IMAGES =
-            "INSERT INTO recipe_images (recipe_id, image_src) value (:recipeId, :imageSrc)"; // 테스트
+            "INSERT INTO recipe_images (recipe_id, image_url) value (:recipeId, :imageSrc)"; // 테스트
 
     // NOTE: 레시피 재료 삽입
     public static String INSERT_RECIPE_INGREDIENT =
@@ -23,7 +23,7 @@ public class RecipeSqlQuery {
                     "       recipe_ingredients.ingredients,\n" +
                     "       recipe_likes.like_num,\n" +
                     "       recipe_views.view_num,\n" +
-                    "       recipe_images.image_src AS recipe_image_urls,\n" +
+                    "       recipe_images.image_url AS recipe_image_urls,\n" +
                     "       (SELECT temp_recipe_likes.is_like\n" +
                     "        FROM recipe_likes AS temp_recipe_likes\n" +
                     "        WHERE temp_recipe_likes.recipe_id = recipes.recipe_id\n" +
@@ -42,7 +42,7 @@ public class RecipeSqlQuery {
                     "                   ON recipe_likes.recipe_id = recipes.recipe_id\n" +
                     "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS view_num FROM recipe_histories GROUP BY recipe_id) AS recipe_views\n" +
                     "                   ON recipe_views.recipe_id = recipes.recipe_id\n" +
-                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
+                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_url SEPARATOR ',') as image_url\n" +
                     "                     FROM recipe_images\n" +
                     "                     GROUP BY recipe_id) AS recipe_images\n" +
                     "                    ON recipe_images.recipe_id = recipes.recipe_id\n" +
@@ -60,7 +60,7 @@ public class RecipeSqlQuery {
                     "       recipe_ingredients.ingredients,\n" +
                     "       recipe_likes.like_num,\n" +
                     "       recipe_views.view_num,\n" +
-                    "       recipe_images.image_src AS recipe_image_urls,\n" +
+                    "       recipe_images.image_url AS recipe_image_urls,\n" +
                     "       (SELECT temp_recipe_likes.is_like\n" +
                     "        FROM recipe_likes AS temp_recipe_likes\n" +
                     "        WHERE temp_recipe_likes.recipe_id = recipes.recipe_id\n" +
@@ -79,7 +79,7 @@ public class RecipeSqlQuery {
                     "                   ON recipe_likes.recipe_id = recipes.recipe_id\n" +
                     "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS view_num FROM recipe_histories GROUP BY recipe_id) AS recipe_views\n" +
                     "                   ON recipe_views.recipe_id = recipes.recipe_id\n" +
-                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
+                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_url SEPARATOR ',') as image_url\n" +
                     "                     FROM recipe_images\n" +
                     "                     GROUP BY recipe_id) AS recipe_images\n" +
                     "                    ON recipe_images.recipe_id = recipes.recipe_id\n" +
@@ -97,7 +97,7 @@ public class RecipeSqlQuery {
                     "       recipe_ingredients.ingredients,\n" +
                     "       recipe_likes.like_num,\n" +
                     "       recipe_views.view_num,\n" +
-                    "       recipe_images.image_src AS recipe_image_urls,\n" +
+                    "       recipe_images.image_url AS recipe_image_urls,\n" +
                     "       (SELECT temp_recipe_likes.is_like\n" +
                     "        FROM recipe_likes AS temp_recipe_likes\n" +
                     "        WHERE temp_recipe_likes.recipe_id = recipes.recipe_id\n" +
@@ -116,7 +116,7 @@ public class RecipeSqlQuery {
                     "                   ON recipe_likes.recipe_id = recipes.recipe_id\n" +
                     "         LEFT JOIN (SELECT recipe_id, COUNT(*) AS view_num FROM recipe_histories GROUP BY recipe_id) AS recipe_views\n" +
                     "                   ON recipe_views.recipe_id = recipes.recipe_id\n" +
-                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
+                    "         INNER JOIN (SELECT recipe_id, GROUP_CONCAT(image_url SEPARATOR ',') as image_url\n" +
                     "                     FROM recipe_images\n" +
                     "                     GROUP BY recipe_id) AS recipe_images\n" +
                     "                    ON recipe_images.recipe_id = recipes.recipe_id\n" +

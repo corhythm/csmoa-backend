@@ -7,7 +7,7 @@ public class ReviewSqlQuery {
             "item_star_score, cs_brand, content) VALUE (?, ?, ?, ?, ?, ?)";
 
     // NOTE: 리뷰 이미지 삽입
-    public static String INSERT_REVIEW_IMAGES = "INSERT INTO review_images (review_id, image_src) value (:reviewId, :imageSrc)";
+    public static String INSERT_REVIEW_IMAGES = "INSERT INTO review_images (review_id, image_url) value (:reviewId, :imageSrc)";
 
     // NOTE: 이번주 베스트 리뷰 가져오기
     public static String GET_BEST_REVIEWS =
@@ -30,7 +30,7 @@ public class ReviewSqlQuery {
                     "       review_likes.like_num,\n" +
                     "       review_views.view_num,\n" +
                     "       review_comments.comment_num,\n" +
-                    "       review_images.image_src AS review_image_urls,\n" +
+                    "       review_images.image_url AS review_image_urls,\n" +
                     "       (SELECT temp_review_likes.is_like\n" +
                     "        FROM review_likes AS temp_review_likes\n" +
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
@@ -45,7 +45,7 @@ public class ReviewSqlQuery {
                     "                    WHERE depth = 1\n" +
                     "                    GROUP BY review_id) AS review_comments\n" +
                     "                   ON review_comments.review_id = reviews.review_id\n" +
-                    "         INNER JOIN (SELECT review_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
+                    "         INNER JOIN (SELECT review_id, GROUP_CONCAT(image_url SEPARATOR ',') as image_url\n" +
                     "                     FROM review_images\n" +
                     "                     GROUP BY review_id) AS review_images\n" +
                     "                    ON review_images.review_id = reviews.review_id\n" +
@@ -73,7 +73,7 @@ public class ReviewSqlQuery {
                     "       review_likes.like_num,\n" +
                     "       review_views.view_num,\n" +
                     "       review_comments.comment_num,\n" +
-                    "       review_images.image_src AS review_image_urls,\n" +
+                    "       review_images.image_url AS review_image_urls,\n" +
                     "       (SELECT temp_review_likes.is_like\n" +
                     "        FROM review_likes AS temp_review_likes\n" +
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
@@ -88,7 +88,7 @@ public class ReviewSqlQuery {
                     "                    WHERE depth = 1\n" +
                     "                    GROUP BY review_id) AS review_comments\n" +
                     "                   ON review_comments.review_id = reviews.review_id\n" +
-                    "         INNER JOIN (SELECT review_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
+                    "         INNER JOIN (SELECT review_id, GROUP_CONCAT(image_url SEPARATOR ',') as image_url\n" +
                     "                     FROM review_images\n" +
                     "                     GROUP BY review_id) AS review_images\n" +
                     "                    ON review_images.review_id = reviews.review_id\n" +
@@ -116,7 +116,7 @@ public class ReviewSqlQuery {
                     "       review_likes.like_num,\n" +
                     "       review_views.view_num,\n" +
                     "       review_comments.comment_num,\n" +
-                    "       review_images.image_src AS review_image_urls,\n" +
+                    "       review_images.image_url AS review_image_urls,\n" +
                     "       (SELECT temp_review_likes.is_like\n" +
                     "        FROM review_likes AS temp_review_likes\n" +
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
@@ -131,7 +131,7 @@ public class ReviewSqlQuery {
                     "                    WHERE depth = 1\n" +
                     "                    GROUP BY review_id) AS review_comments\n" +
                     "                   ON review_comments.review_id = reviews.review_id\n" +
-                    "         INNER JOIN (SELECT review_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
+                    "         INNER JOIN (SELECT review_id, GROUP_CONCAT(image_url SEPARATOR ',') as image_url\n" +
                     "                     FROM review_images\n" +
                     "                     GROUP BY review_id) AS review_images\n" +
                     "                    ON review_images.review_id = reviews.review_id\n" +
@@ -161,7 +161,7 @@ public class ReviewSqlQuery {
                     "       review_likes.like_num,\n" +
                     "       review_views.view_num,\n" +
                     "       review_comments.comment_num,\n" +
-                    "       review_images.image_src AS review_image_urls,\n" +
+                    "       review_images.image_url AS review_image_urls,\n" +
                     "       (SELECT temp_review_likes.is_like\n" +
                     "        FROM review_likes AS temp_review_likes\n" +
                     "        WHERE temp_review_likes.review_id = reviews.review_id\n" +
@@ -176,7 +176,7 @@ public class ReviewSqlQuery {
                     "                    WHERE depth = 1\n" +
                     "                    GROUP BY review_id) AS review_comments\n" +
                     "                   ON review_comments.review_id = reviews.review_id\n" +
-                    "         INNER JOIN (SELECT review_id, GROUP_CONCAT(image_src SEPARATOR ',') as image_src\n" +
+                    "         INNER JOIN (SELECT review_id, GROUP_CONCAT(image_url SEPARATOR ',') as image_url\n" +
                     "                     FROM review_images\n" +
                     "                     GROUP BY review_id) AS review_images\n" +
                     "                    ON review_images.review_id = reviews.review_id\n" +
