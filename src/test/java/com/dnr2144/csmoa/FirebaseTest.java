@@ -64,11 +64,11 @@ public class FirebaseTest {
         return String.format(DOWNLOAD_URL, URLEncoder.encode(fileName, StandardCharsets.UTF_8));
     }
 
-    @Test
-    void convertFile(MultipartFile multipartFile) {
-        File tempFile = new File("src/main/resources/serviceAccountKey.json");
-        log.info(tempFile.getName() + ", " + tempFile.length());
-    }
+//    @Test
+//    void convertFile(MultipartFile multipartFile) {
+//        File tempFile = new File("src/main/resources/serviceAccountKey.json");
+//        log.info(tempFile.getName() + ", " + tempFile.length());
+//    }
 }
 
 @Getter

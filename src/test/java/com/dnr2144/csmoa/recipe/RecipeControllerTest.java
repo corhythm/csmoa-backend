@@ -24,18 +24,18 @@ class RecipeControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
-    void Get에서는_setter가_없어도된다() throws Exception {
-        String content = objectMapper.writeValueAsString(PostRecipeLikeRes.builder().recipeId(1L).userId(4L).isLike(false).build());
-
-        mvc.perform(post("/recipes/1/like")
-                        .header("Access-Token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjQsImlhdCI6MTYzODU5MTU2MiwiZXhwIjoxNjM4Njc3OTYyfQ.01NM_8f7p7wyO6fKRcJx6sQC7IXSvOYwxEoU56z4Ilo")
-//                    .content(content)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(content));
-    }
+//    @Test
+//    void Get에서는_setter가_없어도된다() throws Exception {
+//        String content = objectMapper.writeValueAsString(PostRecipeLikeRes.builder().recipeId(1L).userId(4L).isLike(false).build());
+//
+//        mvc.perform(post("/recipes/1/like")
+//                        .header("Access-Token", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjQsImlhdCI6MTYzODU5MTU2MiwiZXhwIjoxNjM4Njc3OTYyfQ.01NM_8f7p7wyO6fKRcJx6sQC7IXSvOYwxEoU56z4Ilo")
+//                        .content(content)
+//                        .contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(status().isOk())
+//                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+//                .andExpect(content().json(content));
+//    }
 
     @Test
     void StringSplitTest() {
